@@ -7,8 +7,11 @@ import os
 import numpy as np
 import utils
 from simulation import vrep
-from config import color_space
+import sys
+sys.path.append(os.path.abspath("/home/hosseini/Desktop/grasp_primitiveShape"))
+from general_utils import color_space
 import random
+
 
 class Robot(object):
     

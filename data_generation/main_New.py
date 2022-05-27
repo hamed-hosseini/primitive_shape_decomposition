@@ -5,6 +5,8 @@ import os
 import random
 import shutil
 import argparse
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sc
@@ -13,10 +15,10 @@ from collections import namedtuple
 from robot_New import Robot
 from logger import Logger
 import utils
-
+import sys
 import glob
 
-def create_objects_from_shape(shapes,obj_mesh_dir):
+def create_objects_from_shape(shapes, obj_mesh_dir):
     """ Create objects folder for simulation from shapes generated"""
     # delete and create block_gen directory for the simulator
     if os.path.exists(obj_mesh_dir):
@@ -42,7 +44,7 @@ def main(args, shapes):
 
     max_num_obj = len(shapes) # number of object
 
-    port_num=int(args.port)
+    port_num = int(args.port)
     obj_mesh_dir = "objects/block_gen_" + str(port_num)  # where .obj are located
     obj_mesh_dir = os.path.abspath(obj_mesh_dir)
 
@@ -64,18 +66,25 @@ def main(args, shapes):
     NUM_ITERATIONS = int(args.num_iterations)
     for iter in range(NUM_ITERATIONS):
         #hmd
-        random.shuffle(shapes)
-        shapes_sampled = random.sample(shapes, random.randint(1,8))
-        random.shuffle(shapes_sampled)
-        num_obj = len(shapes_sampled)
+        # random.shuffle(shapes)
+        # shapes_sampled = random.sample(shapes, random.randint(1,min(8, len(shapes))))
+        # random.shuffle(shapes_sampled)
+        # num_obj = len(shapes_sampled)
         #hmd
+
+        #base paper
+        random.shuffle(shapes)
+        shapes_sampled = shapes
+        num_obj = len(shapes_sampled)
+        #base paper
+
         obj_list = create_objects_from_shape(shapes_sampled, obj_mesh_dir)
         # Save obj list
         logger.save_obj_list(iter, obj_list)
 
         # Initialize pick-and-place system (camera and robot)
         robot = Robot(is_sim, obj_mesh_dir, num_obj, shapes_sampled, workspace_limits, port_num)
-        print('hi')
+        print(iter)
         # Get latest RGB-D image
         color_img, depth_img = robot.get_camera_data()
         depth_img = depth_img * robot.cam_depth_scale # Apply depth scale from calibration
@@ -127,11 +136,16 @@ def main(args, shapes):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Data Collection Process")
-    parser.add_argument("-n", "--num_iterations", default=300, help="number of images to collect")
+    parser.add_argument("-n", "--num_iterations", default=10000, help="number of images to collect")
     parser.add_argument("-o", "--offset", default=0, help="start saving images starting from #offset image")
     parser.add_argument("-p", "--port", default=19997, help="port number")
     args = parser.parse_args()
     # Shapes to use
-    shapes = ["Semisphere","Semisphere","Cuboid", "Cuboid", "Cylinder","Cylinder", "Ring","Ring", "Stick","Stick", "Sphere", "Sphere"]
+    # shapes = ["Cylinder", "Cylinder", "Cuboid", "Cuboid",
+    #           "Semisphere","Semisphere",
+    #           "Truncatedcone","Truncatedcone", "Cone", "Cone",
+    #           "Box","Box", "Ring","Ring", "Stick","Stick", "Sphere", "Sphere"]
+    shapes = ["Cuboid", "Sphere", "Semisphere", "Ring", "Cylinder", "Stick"]
+    # shapes = ["Semisphere","Semisphere","Cuboid", "Cuboid", "Cylinder","Cylinder", "Ring","Ring", "Stick","Stick", "Sphere", "Sphere"]
     # shapes = ["Cylinder", "Cuboid", "Ring", "Stick", "Sphere", "Semisphere"]
     main(args, shapes)

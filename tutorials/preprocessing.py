@@ -5,8 +5,9 @@ import os
 from PIL import Image
 import json
 from my_image import MyImage
+import general_utils
 if __name__ == '__main__':
-    root_dir = "/home/hamed/Desktop/grasp_primitiveShape/data_generation/logs/2021-11-07.10:21:03/data"
+    root_dir = "/home/hosseini/Desktop/grasp_primitiveShape/data_generation/logs/2022-04-03.18:16:57/data"
     path = 'datasets/primitive_shapes'
     if os.path.exists(path):
         shutil.rmtree(path)
@@ -31,7 +32,6 @@ if __name__ == '__main__':
     if os.path.exists(os.path.join(path, 'val', 'depth')):
         shutil.rmtree(os.path.join(path, 'val', 'depth'))
     os.mkdir(os.path.join(path, 'val', 'depth'))
-
 
     if os.path.exists(os.path.join(path, 'test')):
         shutil.rmtree(os.path.join(path, 'test'))
@@ -69,6 +69,8 @@ if __name__ == '__main__':
     ann_ind_start_test = 0
     for root, directories, files in os.walk(os.path.join(root_dir, 'color_images'), topdown=False):
         for ind, name in enumerate(sorted(files)):
+            if ind%10 == 0:
+                print(ind)
             im_mask = Image.open(os.path.join(root, name)).convert('RGB')
             im_depth = Image.open(os.path.join(
                 os.path.join(root_dir, 'depth_images'),
@@ -129,30 +131,12 @@ if __name__ == '__main__':
     }
 
 
-    anno_json_train['categories'] = [
-        {"supercategory": "primitive_shape", "id": 1, "name": "cuboid"},
-        {"supercategory": "primitive_shape", "id": 2, "name": "sphere"},
-        {"supercategory": "primitive_shape", "id": 3, "name": "semisphere"},
-        {"supercategory": "primitive_shape", "id": 4, "name": "cylinder"},
-        {"supercategory": "primitive_shape", "id": 5, "name": "ring"},
-        {"supercategory": "primitive_shape", "id": 6, "name": "stick"}
-    ]
-    anno_json_val['categories'] = [
-        {"supercategory": "primitive_shape", "id": 1, "name": "cuboid"},
-        {"supercategory": "primitive_shape", "id": 2, "name": "sphere"},
-        {"supercategory": "primitive_shape", "id": 3, "name": "semisphere"},
-        {"supercategory": "primitive_shape", "id": 4, "name": "cylinder"},
-        {"supercategory": "primitive_shape", "id": 5, "name": "ring"},
-        {"supercategory": "primitive_shape", "id": 6, "name": "stick"}
-    ]
-    anno_json_test['categories'] = [
-        {"supercategory": "primitive_shape", "id": 1, "name": "cuboid"},
-        {"supercategory": "primitive_shape", "id": 2, "name": "sphere"},
-        {"supercategory": "primitive_shape", "id": 3, "name": "semisphere"},
-        {"supercategory": "primitive_shape", "id": 4, "name": "cylinder"},
-        {"supercategory": "primitive_shape", "id": 5, "name": "ring"},
-        {"supercategory": "primitive_shape", "id": 6, "name": "stick"}
-    ]
+    anno_json_train['categories'] = [{"supercategory": "primitive_shape", "id": key, "name": value }
+                                     for key, value in general_utils.id_category.items()]
+    anno_json_val['categories'] = [{"supercategory": "primitive_shape", "id": key, "name": value }
+                                   for key, value in general_utils.id_category.items()]
+    anno_json_test['categories'] = [{"supercategory": "primitive_shape", "id": key, "name": value }
+                                    for key, value in general_utils.id_category.items()]
 
     anno_json_train['annotations'] = desc_annotations_train
     anno_json_val['annotations'] = desc_annotations_val
@@ -166,6 +150,3 @@ if __name__ == '__main__':
 
     with open(os.path.join(path,'test', 'coco_annotations.json'), 'w') as f:
             json.dump(anno_json_test, f)
-
-
-

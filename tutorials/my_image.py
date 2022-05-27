@@ -1,18 +1,22 @@
 import os
 import random
 import sys
-sys.path.append(os.path.abspath("/home/hamed/Desktop/grasp_primitiveShape"))
-from config import color_space
+sys.path.append(os.path.abspath("/home/hosseini/Desktop/grasp_primitiveShape"))
+from general_utils import color_space
 from PIL import Image
 from skimage import measure  # (pip install scikit-image)
 from shapely.geometry import Polygon, MultiPolygon  # (pip install Shapely)
 import numpy as np
-from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
+
 
 
 class MyImage():
     def __init__(self, name, id,  rgb, mask, depth, info, ann_ind_start, is_crowd):
         self.name = name
+        self.processed_name = self.name.split('.png')[0].split('_')[2]
         self.id = id
         self.rgb = rgb
         self.mask = mask
@@ -22,7 +26,8 @@ class MyImage():
         self.ann_ind_start = ann_ind_start
         self.is_crowd = is_crowd
         self.annotations = []
-        self.primitives = {'cuboid':1, 'sphere':2, 'semisphere':3, 'cylinder':4, 'ring':5, 'stick':6}
+        self.primitives = {'cuboid':1, 'sphere':2, 'semisphere':3, 'cylinder':4, 'ring':5,
+                           'stick':6, 'box':7, 'cone':8, 'truncatedcone':9}
 
     def recolor(self):
         origin_colors = [eval(i) for i in self.info.keys()]
@@ -50,7 +55,7 @@ class MyImage():
             normalized_color = str(tuple(np.asarray(eval(color))/255))
             category_id = self.primitives[self.info[normalized_color]]
             annotation_id = self.ann_ind_start + ind
-            self.annotations.append(self.create_sub_mask_annotation(sub_mask, category_id, annotation_id, 0))
+            self.annotations.append(self.create_sub_mask_annotation(np.asarray(sub_mask), category_id, annotation_id, 0))
             # print('file_name', files[ind])
         return self.annotations
 
@@ -73,9 +78,15 @@ class MyImage():
                         # because the contours module doesn't handle cases
                         # where pixels bleed to the edge of the image
                         self.sub_masks[pixel_str] = Image.new('1', (self.width + 2, self.height + 2))
-
                     # Set the pixel value to 1 (default is 0), accounting for padding
                     self.sub_masks[pixel_str].putpixel((x + 1, y + 1), 1)
+
+        # for key, (pixel_str, img) in enumerate(self.sub_masks.items()):
+        #     dir = os.path.join(os.getcwd(), 'mask_results', self.processed_name)
+        #     if not os.path.exists(dir):
+        #         os.makedirs(dir)
+        #     self.sub_masks[pixel_str].save(os.path.join(dir,str(key) + '.png'))
+
         self.count_ann = len(self.sub_masks)
 
     def create_sub_mask_annotation(self, sub_mask,category_id, annotation_id, is_crowd):
@@ -83,11 +94,10 @@ class MyImage():
         # Note: there could be multiple contours if the object
         # is partially occluded. (E.g. an elephant behind a tree)
         contours = measure.find_contours(sub_mask, 0.5, positive_orientation='low')
-
         segmentations = []
         polygons = []
         # plt.figure()
-        for contour in contours:
+        for key, contour in enumerate(contours):
             # Flip from (row, col) representation to (x, y)
             # and subtract the padding pixel
             for i in range(len(contour)):
@@ -119,9 +129,13 @@ class MyImage():
             # poly = poly.simplify(0.5, preserve_topology=False)
             # xs = np.array(poly.exterior.coords)[:, 0]
             # ys = np.array(poly.exterior.coords)[:, 1]
-            # plt.title('after simpility')
-            # plt.axis('equal')
+            # plt.title('contour for every sub_mask')
+            # # plt.axis('equal')
             # plt.plot(xs, ys)
+            # dir = os.path.join(os.getcwd(), 'contour_results', self.processed_name)
+            # if not os.path.exists(dir):
+            #     os.makedirs(dir)
+            # plt.savefig(os.path.join(dir, str(key) + '.png'))
 
             polygons.append(poly)
             segmentation = np.array(poly.exterior.coords).ravel().tolist()
@@ -130,17 +144,11 @@ class MyImage():
 
         # Combine the polygons to calculate the bounding box and area
         multi_poly = MultiPolygon(polygons)
-        try:
-            x, y, max_x, max_y = multi_poly.bounds
-            width = max_x - x
-            height = max_y - y
-            bbox = (x, y, width, height)
-            area = multi_poly.area
-        except:
-            width = 0
-            height = 0
-            bbox = (0, 0, 0, 0)
-            area = 0
+        x, y, max_x, max_y = multi_poly.bounds
+        width = max_x - x
+        height = max_y - y
+        bbox = (x, y, width, height)
+        area = multi_poly.area
 
         annotation = {
             'segmentation': segmentations,

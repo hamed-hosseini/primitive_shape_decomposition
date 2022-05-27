@@ -169,8 +169,9 @@ def display_instances(image, boxes, masks, class_ids, class_names,
         # plt.show()
     # if os.path.exists(os.path.join(path, 'train')):
     #     shutil.rmtree(os.path.join(path, 'train'))
-    new_path = os.path.join(os.path.join(title.split('color_image')[0], 'predict'+my_time), title.split('rgb/')[1])
-    print(new_path)
+    # new_path = os.path.join(os.path.join(title.split('color_image')[0], 'predict'+my_time), title.split('rgb/')[1])
+    new_path = os.path.join('datasets', 'primitive_shapes', 'test', 'rgb',  os.path.join('predict'+my_time, str(title)))
+    # print(new_path)
     plt.savefig(new_path)
 
 def display_differences(image,
