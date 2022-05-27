@@ -11,3 +11,9 @@ color_space = np.asarray([[78.0, 121.0, 167.0], # blue
                           [176, 122, 161], # purple
                           [118, 183, 178], # cyan
                           [255, 157, 167]])/255.0 #pink
+
+id_category = {1:'cuboid', 2:'sphere', 3:'semisphere', 4:'cylinder', 5:'ring',
+                6:'stick', 7:'box', 8:'cone', 9:'truncatedcone'}
+
+category_id = {'cuboid':1, 'sphere':2, 'semisphere':3, 'cylinder':4, 'ring':5,
+               'stick':6, 'box':7, 'cone':8, 'truncatedcone':9}
