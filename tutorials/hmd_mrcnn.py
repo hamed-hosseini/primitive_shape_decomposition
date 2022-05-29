@@ -172,8 +172,8 @@ class CocoLikeDataset(utils.Dataset):
 class InferenceConfig(CigButtsConfig):
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
-    IMAGE_MIN_DIM = 512
-    IMAGE_MAX_DIM = 512
+    # IMAGE_MIN_DIM = 512
+    # IMAGE_MAX_DIM = 512
     #hmd
     # IMAGE_MIN_DIM = 480
     # IMAGE_MAX_DIM = 640
@@ -236,7 +236,7 @@ if __name__=='__main__':
         mask, class_ids = dataset.load_mask(image_id)
         visualize.display_top_masks(image, mask, class_ids, dataset.class_names)
 
-    Train = True
+    Train = False
     Test = True
     if Train:
         #...................................Start Trainng...................................................
@@ -285,13 +285,14 @@ if __name__=='__main__':
         start_train = time.time()
         model.train(dataset_train, dataset_val,
                     learning_rate=config.LEARNING_RATE * 10,
-                    epochs=3,
+                    epochs=2,
                     layers="all")
         end_train = time.time()
         minutes = round((end_train - start_train) / 60, 2)
         print('Training took {0} minutes'.format(minutes))
         # #######################################
     if Test:
+        print('Testing')
         #.............................................Finish Trainning...................................................
         inference_config = InferenceConfig()
 
@@ -339,7 +340,6 @@ if __name__=='__main__':
                 mask_pred_final[:, :, class_id] += mask_pred[:, :, index]
             for index, class_id in enumerate(class_ids_target):
                 mask_target_final[:, :, class_id] += mask_target[:, :, index]
-
             visualize.display_instances(img, r['rois'], r['masks'], r['class_ids'],
                                         dataset_test.class_names, r['scores'], title=ind, my_time=my_time,
                                         figsize=(15, 15))
