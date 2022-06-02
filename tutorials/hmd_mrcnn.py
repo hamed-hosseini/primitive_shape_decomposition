@@ -240,7 +240,6 @@ if __name__=='__main__':
     Train = True
     # Train = False
     Test = True
-    # Test = False
     if Train:
         #...................................Start Trainng...................................................
         # Create model in training mode
@@ -295,6 +294,7 @@ if __name__=='__main__':
         print('Training took {0} minutes'.format(minutes))
         # #######################################
     if Test:
+        print('Testing')
         #.............................................Finish Trainning...................................................
         inference_config = InferenceConfig()
 
