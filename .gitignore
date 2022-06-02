@@ -1,5 +1,6 @@
 .idea
 .pth
+test/
 data_generation/logs/
 tutorials/logs/
 tutorials/datasets/primitive_shapes/test/
@@ -7,4 +8,8 @@ tutorials/datasets/primitive_shapes/train/
 tutorials/datasets/primitive_shapes/val/
 __pycache__/
 tutorials/__pycache__/
+tutorials/contour_results/
+tutorials/mask_results/
+tutorials/results/
+tutorials/mask_rcnn_coco.h5
 venv/

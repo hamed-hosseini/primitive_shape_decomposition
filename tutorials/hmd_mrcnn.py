@@ -38,6 +38,7 @@ class CigButtsConfig(Config):
     """
     # Give the configuration a recognizable name
     NAME = "depth_net"
+    # NAME = "cig_butts"
     Network_mode = 'depth' # rgb, depth, rgb_depth
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
@@ -172,8 +173,8 @@ class CocoLikeDataset(utils.Dataset):
 class InferenceConfig(CigButtsConfig):
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
-    IMAGE_MIN_DIM = 512
-    IMAGE_MAX_DIM = 512
+    # IMAGE_MIN_DIM = 512
+    # IMAGE_MAX_DIM = 512
     #hmd
     # IMAGE_MIN_DIM = 480
     # IMAGE_MAX_DIM = 640
@@ -225,7 +226,7 @@ if __name__=='__main__':
         dataset_test.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/coco_annotations.json'),
                               os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/rgb'))
     elif config.Network_mode == 'depth':
-        dataset_val.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/coco_annotations.json'),
+        dataset_test.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/coco_annotations.json'),
                               os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/depth'))
     dataset_test.prepare()
 
@@ -237,7 +238,9 @@ if __name__=='__main__':
         visualize.display_top_masks(image, mask, class_ids, dataset.class_names)
 
     Train = True
+    # Train = False
     Test = True
+    # Test = False
     if Train:
         #...................................Start Trainng...................................................
         # Create model in training mode
@@ -285,7 +288,7 @@ if __name__=='__main__':
         start_train = time.time()
         model.train(dataset_train, dataset_val,
                     learning_rate=config.LEARNING_RATE * 10,
-                    epochs=3,
+                    epochs=2,
                     layers="all")
         end_train = time.time()
         minutes = round((end_train - start_train) / 60, 2)
@@ -339,7 +342,6 @@ if __name__=='__main__':
                 mask_pred_final[:, :, class_id] += mask_pred[:, :, index]
             for index, class_id in enumerate(class_ids_target):
                 mask_target_final[:, :, class_id] += mask_target[:, :, index]
-
             visualize.display_instances(img, r['rois'], r['masks'], r['class_ids'],
                                         dataset_test.class_names, r['scores'], title=ind, my_time=my_time,
                                         figsize=(15, 15))
