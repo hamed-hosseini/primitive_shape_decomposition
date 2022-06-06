@@ -58,7 +58,7 @@ class CigButtsConfig(Config):
     IMAGE_MAX_DIM = 640
 
     # You can experiment with this number to see if it improves training
-    STEPS_PER_EPOCH = 2
+    STEPS_PER_EPOCH = 20
 
     # This is how often validation is run. If you are using too much hard drive space
     # on saved models (in the MODEL_DIR), try making this value larger.
@@ -182,8 +182,8 @@ class InferenceConfig(CigButtsConfig):
     DETECTION_MIN_CONFIDENCE = 0.9
 
 if __name__=='__main__':
-    debug = True
-    # debug = False
+    # debug = True
+    debug = False
     print(os.getcwd())
     # Set the ROOT_DIR variable to the root directory of the Mask_RCNN git repo
     ROOT_DIR = './'
@@ -265,8 +265,8 @@ if __name__=='__main__':
         mask, class_ids = dataset.load_mask(image_id)
         visualize.display_top_masks(image, mask, class_ids, dataset.class_names)
 
-    # Train = True
-    Train = False
+    Train = True
+    # Train = False
     Test = True
     if Train:
         #...................................Start Trainng...................................................
@@ -315,7 +315,7 @@ if __name__=='__main__':
         start_train = time.time()
         model.train(dataset_train, dataset_val,
                     learning_rate=config.LEARNING_RATE * 10,
-                    epochs=2,
+                    epochs=100,
                     layers="all")
         end_train = time.time()
         minutes = round((end_train - start_train) / 60, 2)
@@ -347,12 +347,18 @@ if __name__=='__main__':
 
         my_time = str(time.time())
         if debug:
-            os.mkdir(os.path.join('datasets_debug', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
+            if config.Network_mode == 'rgb':
+                os.mkdir(os.path.join('datasets_debug', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
+            elif config.Network_mode == 'depth':
+                os.mkdir(os.path.join('datasets_debug', 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
         else:
-            os.mkdir(os.path.join('datasets', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
+            if config.Network_mode == 'rgb':
+                os.mkdir(os.path.join('datasets', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
+            elif config.Network_mode == 'depth':
+                os.mkdir(os.path.join('datasets', 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
         for ind in dataset_test.image_ids:
-            if ind == 3:
-                break
+            # if ind == 3:
+            #     break
             print(ind, ' from: ', len(dataset_test.image_ids))
             img = dataset_test.load_image(ind)
             img_arr = np.array(img)
@@ -375,7 +381,7 @@ if __name__=='__main__':
                 mask_target_final[:, :, class_id] += mask_target[:, :, index]
             visualize.display_instances(img, r['rois'], r['masks'], r['class_ids'],
                                         dataset_test.class_names, r['scores'], title=ind, my_time=my_time,
-                                        figsize=(15, 15),debug=debug)
+                                        figsize=(15, 15),debug=debug, config=config)
 
             ious = np.append(ious, np.array([iou_coef(mask_target_final, mask_pred_final, smooth=0)]), axis=0)
             dices = np.append(dices, np.array([dice_coef(mask_target_final, mask_pred_final, smooth=0)]), axis=0)
