@@ -16,6 +16,7 @@ import  pandas as pd
 import skimage
 import general_utils
 
+
 def dice_coef(y_true, y_pred, smooth=1):
     intersection = np.sum(y_true * y_pred, axis=(0, 1))
     union = np.sum(y_true, axis=(0, 1)) + np.sum(y_pred, axis=(0, 1))
@@ -181,6 +182,8 @@ class InferenceConfig(CigButtsConfig):
     DETECTION_MIN_CONFIDENCE = 0.9
 
 if __name__=='__main__':
+    debug = True
+    # debug = False
     print(os.getcwd())
     # Set the ROOT_DIR variable to the root directory of the Mask_RCNN git repo
     ROOT_DIR = './'
@@ -202,32 +205,57 @@ if __name__=='__main__':
     config.display()
 
     dataset_train = CocoLikeDataset()
-    if config.Network_mode =='rgb':
-        dataset_train.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/coco_annotations.json'),
-                                os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/rgb'))
-    elif config.Network_mode == 'depth':
-        dataset_train.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/coco_annotations.json'),
-                                os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/depth'))
+    if debug:
+        if config.Network_mode =='rgb':
+            dataset_train.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
+                                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/rgb'))
+        elif config.Network_mode == 'depth':
+            dataset_train.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
+                                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/depth'))
+    else:
+        if config.Network_mode =='rgb':
+            dataset_train.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/coco_annotations.json'),
+                                    os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/rgb'))
+        elif config.Network_mode == 'depth':
+            dataset_train.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/coco_annotations.json'),
+                                    os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/depth'))
 
     dataset_train.prepare()
 
 
     dataset_val = CocoLikeDataset()
-    if config.Network_mode == 'rgb':
-        dataset_val.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/coco_annotations.json'),
-                              os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/depth'))
-    elif config.Network_mode == 'depth':
-        dataset_val.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/coco_annotations.json'),
-                              os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/depth'))
+    if debug:
+        if config.Network_mode == 'rgb':
+            dataset_val.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/depth'))
+        elif config.Network_mode == 'depth':
+            dataset_val.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/depth'))
+    else:
+        if config.Network_mode == 'rgb':
+            dataset_val.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/depth'))
+        elif config.Network_mode == 'depth':
+            dataset_val.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/depth'))
+
     dataset_val.prepare()
 
     dataset_test = CocoLikeDataset()
-    if config.Network_mode == 'rgb':
-        dataset_test.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/coco_annotations.json'),
-                              os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/rgb'))
-    elif config.Network_mode == 'depth':
-        dataset_test.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/coco_annotations.json'),
-                              os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/depth'))
+    if debug:
+        if config.Network_mode == 'rgb':
+            dataset_test.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/rgb'))
+        elif config.Network_mode == 'depth':
+            dataset_test.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/depth'))
+    else:
+        if config.Network_mode == 'rgb':
+            dataset_test.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/rgb'))
+        elif config.Network_mode == 'depth':
+            dataset_test.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/depth'))
     dataset_test.prepare()
 
     dataset = dataset_train
@@ -237,8 +265,8 @@ if __name__=='__main__':
         mask, class_ids = dataset.load_mask(image_id)
         visualize.display_top_masks(image, mask, class_ids, dataset.class_names)
 
-    Train = True
-    # Train = False
+    # Train = True
+    Train = False
     Test = True
     if Train:
         #...................................Start Trainng...................................................
@@ -318,7 +346,10 @@ if __name__=='__main__':
         dices = np.empty((0, config.NUM_CLASSES - 1), float)
 
         my_time = str(time.time())
-        os.mkdir(os.path.join('datasets', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
+        if debug:
+            os.mkdir(os.path.join('datasets_debug', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
+        else:
+            os.mkdir(os.path.join('datasets', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
         for ind in dataset_test.image_ids:
             if ind == 3:
                 break
@@ -344,7 +375,7 @@ if __name__=='__main__':
                 mask_target_final[:, :, class_id] += mask_target[:, :, index]
             visualize.display_instances(img, r['rois'], r['masks'], r['class_ids'],
                                         dataset_test.class_names, r['scores'], title=ind, my_time=my_time,
-                                        figsize=(15, 15))
+                                        figsize=(15, 15),debug=debug)
 
             ious = np.append(ious, np.array([iou_coef(mask_target_final, mask_pred_final, smooth=0)]), axis=0)
             dices = np.append(dices, np.array([dice_coef(mask_target_final, mask_pred_final, smooth=0)]), axis=0)

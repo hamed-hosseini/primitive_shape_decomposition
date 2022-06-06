@@ -8,7 +8,7 @@ import numpy as np
 import utils
 from simulation import vrep
 import sys
-sys.path.append(os.path.abspath("/home/hosseini/Desktop/grasp_primitiveShape"))
+sys.path.append(os.path.abspath("../."))
 from general_utils import color_space
 import random
 

@@ -7,7 +7,7 @@ import json
 from my_image import MyImage
 import general_utils
 if __name__ == '__main__':
-    root_dir = "/home/hosseini/Desktop/grasp_primitiveShape/data_generation/logs/2022-04-03.18:16:57/data"
+    root_dir = "../data_generation/logs/1/data"
     path = 'datasets/primitive_shapes'
     if os.path.exists(path):
         shutil.rmtree(path)

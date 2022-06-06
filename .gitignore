@@ -6,9 +6,15 @@ tutorials/logs/
 tutorials/datasets/primitive_shapes/test/
 tutorials/datasets/primitive_shapes/train/
 tutorials/datasets/primitive_shapes/val/
+tutorials/datasets_debug/primitive_shapes/test/
+tutorials/datasets_debug/primitive_shapes/train/
+tutorials/datasets_debug/primitive_shapes/val/
 tutorials/results
 tutorials/mask_results
 tutorials/mask_rcnn_coco.h5
 tutorials/__pycache__/
+tutorials/Python-3.6.15/
 tutorials/contour_results/
+tutorials/mrcnn/__pycache__/
+__pycache__/
 venv/

@@ -1,7 +1,7 @@
 import os
 import random
 import sys
-sys.path.append(os.path.abspath("/home/hosseini/Desktop/grasp_primitiveShape"))
+sys.path.append(os.path.abspath("../"))
 from general_utils import color_space
 from PIL import Image
 from skimage import measure  # (pip install scikit-image)

@@ -85,7 +85,7 @@ def display_instances(image, boxes, masks, class_ids, class_names,
                       scores=None, title="", my_time='',
                       figsize=(16, 16), ax=None,
                       show_mask=True, show_bbox=True,
-                      colors=None, captions=None):
+                      colors=None, captions=None, debug=False):
     """
     boxes: [num_instance, (y1, x1, y2, x2, class_id)] in image coordinates.
     masks: [height, width, num_instances]
@@ -170,7 +170,12 @@ def display_instances(image, boxes, masks, class_ids, class_names,
     # if os.path.exists(os.path.join(path, 'train')):
     #     shutil.rmtree(os.path.join(path, 'train'))
     # new_path = os.path.join(os.path.join(title.split('color_image')[0], 'predict'+my_time), title.split('rgb/')[1])
-    new_path = os.path.join('datasets', 'primitive_shapes', 'test', 'rgb',  os.path.join('predict'+my_time, str(title)))
+    if debug:
+        new_path = os.path.join('datasets_debug', 'primitive_shapes', 'test', 'rgb',
+                                os.path.join('predict'+my_time, str(title)))
+    else:
+        new_path = os.path.join('datasets', 'primitive_shapes', 'test', 'rgb',
+                                os.path.join('predict' + my_time, str(title)))
     # print(new_path)
     plt.savefig(new_path)
 
