@@ -38,9 +38,10 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "depth_net"
+    NAME = "rgb_net_test"
     # NAME = "cig_butts"
-    Network_mode = 'depth' # rgb, depth, rgb_depth
+    # Network_mode = 'depth' # rgb, depth, rgb_depth
+    Network_mode = 'rgb' # rgb, depth, rgb_depth
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
@@ -58,7 +59,7 @@ class CigButtsConfig(Config):
     IMAGE_MAX_DIM = 640
 
     # You can experiment with this number to see if it improves training
-    STEPS_PER_EPOCH = 20
+    STEPS_PER_EPOCH = 2
 
     # This is how often validation is run. If you are using too much hard drive space
     # on saved models (in the MODEL_DIR), try making this value larger.
@@ -74,6 +75,13 @@ class CigButtsConfig(Config):
     POST_NMS_ROIS_INFERENCE = 500
     POST_NMS_ROIS_TRAINING = 1000
     USE_MINI_MASK = False
+
+    if Network_mode == 'rgb':
+        IMAGE_CHANNEL_COUNT = 3
+    if Network_mode == 'depth':
+        IMAGE_CHANNEL_COUNT = 1
+    if Network_mode == 'rgb_depth':
+        IMAGE_CHANNEL_COUNT = 4
 class CocoLikeDataset(utils.Dataset):
     """ Generates a COCO-like dataset, i.e. an image dataset annotated in the style of the COCO dataset.
         See http://cocodataset.org/#home for more information.
@@ -182,8 +190,8 @@ class InferenceConfig(CigButtsConfig):
     DETECTION_MIN_CONFIDENCE = 0.9
 
 if __name__=='__main__':
-    # debug = True
-    debug = False
+    debug = True
+    # debug = False
     print(os.getcwd())
     # Set the ROOT_DIR variable to the root directory of the Mask_RCNN git repo
     ROOT_DIR = './'
@@ -274,8 +282,10 @@ if __name__=='__main__':
         model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=MODEL_DIR)
 
+
         # Which weights to start with?
-        init_with = "coco"  # imagenet, coco, or last
+        init_with = "coco"  # imagenet, coco, or last or nothing
+        # init_with = "nothing"  # imagenet, coco, or last or nothing
 
         if init_with == "imagenet":
             model.load_weights(model.get_imagenet_weights(), by_name=True)
@@ -315,7 +325,7 @@ if __name__=='__main__':
         start_train = time.time()
         model.train(dataset_train, dataset_val,
                     learning_rate=config.LEARNING_RATE * 10,
-                    epochs=100,
+                    epochs=3,
                     layers="all")
         end_train = time.time()
         minutes = round((end_train - start_train) / 60, 2)
