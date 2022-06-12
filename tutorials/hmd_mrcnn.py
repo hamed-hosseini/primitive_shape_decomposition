@@ -212,7 +212,7 @@ if __name__=='__main__':
     config = CigButtsConfig()
     config.display()
 
-    dataset_train = CocoLikeDataset()
+    dataset_train = CocoLikeDataset(network_mode=config.Network_mode)
     if debug:
         if config.Network_mode =='rgb':
             dataset_train.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
@@ -231,11 +231,11 @@ if __name__=='__main__':
     dataset_train.prepare()
 
 
-    dataset_val = CocoLikeDataset()
+    dataset_val = CocoLikeDataset(network_mode=config.Network_mode)
     if debug:
         if config.Network_mode == 'rgb':
             dataset_val.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/depth'))
+                                  os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/rgb'))
         elif config.Network_mode == 'depth':
             dataset_val.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
                                   os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/depth'))
@@ -249,7 +249,7 @@ if __name__=='__main__':
 
     dataset_val.prepare()
 
-    dataset_test = CocoLikeDataset()
+    dataset_test = CocoLikeDataset(network_mode=config.Network_mode)
     if debug:
         if config.Network_mode == 'rgb':
             dataset_test.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/coco_annotations.json'),
@@ -268,10 +268,10 @@ if __name__=='__main__':
 
     dataset = dataset_train
     image_ids = np.random.choice(dataset.image_ids, 4)
-    for image_id in image_ids:
-        image = dataset.load_image(image_id)
-        mask, class_ids = dataset.load_mask(image_id)
-        visualize.display_top_masks(image, mask, class_ids, dataset.class_names)
+    # for image_id in image_ids:
+    #     image = dataset.load_image(image_id)
+    #     mask, class_ids = dataset.load_mask(image_id)
+    #     visualize.display_top_masks(image, mask, class_ids, dataset.class_names)
 
     Train = True
     # Train = False
