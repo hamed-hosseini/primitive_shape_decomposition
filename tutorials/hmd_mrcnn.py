@@ -39,7 +39,7 @@ class CigButtsConfig(Config):
     """
     # Give the configuration a recognizable name
     NAME = "rgb_dataold"
-    dataset_name = 'datasets_old'
+    dataset_name = 'datasets_old_paper'
     # NAME = "cig_butts"
     # Network_mode = 'depth' # rgb, depth, rgb_depth
     Network_mode = 'rgb' # rgb, depth, rgb_depth
@@ -244,7 +244,7 @@ if __name__=='__main__':
     else:
         if config.Network_mode == 'rgb':
             dataset_val.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/depth'))
+                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/rgb'))
         elif config.Network_mode == 'depth':
             dataset_val.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
                                   os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/depth'))
