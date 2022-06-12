@@ -252,12 +252,13 @@ class Dataset(object):
     See COCODataset and ShapesDataset as examples.
     """
 
-    def __init__(self, class_map=None):
+    def __init__(self, network_mode='rgb', class_map=None):
         self._image_ids = []
         self.image_info = []
         # Background is always the first class
         self.class_info = [{"source": "", "id": 0, "name": "BG"}]
         self.source_class_ids = {}
+        self.network_mode = network_mode
 
     def add_class(self, source, class_id, class_name):
         assert "." not in source, "Source name cannot contain a dot"
@@ -356,13 +357,19 @@ class Dataset(object):
         """Load the specified image and return a [H,W,3] Numpy array.
         """
         # Load image
-        image = skimage.io.imread(self.image_info[image_id]['path'])
+        # image['file_name'].replace('color', 'depth')
+        if self.network_mode == 'rgb':
+            image = skimage.io.imread(self.image_info[image_id]['path'])
+        elif self.network_mode == 'depth':
+            image = skimage.io.imread(self.image_info[image_id]['path'].replace('color_image', 'depth_image'))
         # If grayscale. Convert to RGB for consistency.
-        if image.ndim != 3:
-            image = skimage.color.gray2rgb(image)
+        #hmd think doesnt need!!
+        # if image.ndim != 3:
+        #     image = skimage.color.gray2rgb(image)
         # If has an alpha channel, remove it for consistency
-        if image.shape[-1] == 4:
-            image = image[..., :3]
+        #hmd thinks doesnt need!!!
+        # if image.shape[-1] == 4:
+        #     image = image[..., :3]
         return image
 
     def load_mask(self, image_id):
