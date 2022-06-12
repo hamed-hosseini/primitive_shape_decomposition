@@ -38,7 +38,8 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "rgb_net_test"
+    NAME = "rgb_dataold"
+    dataset_name = 'datasets_old'
     # NAME = "cig_butts"
     # Network_mode = 'depth' # rgb, depth, rgb_depth
     Network_mode = 'rgb' # rgb, depth, rgb_depth
@@ -59,7 +60,8 @@ class CigButtsConfig(Config):
     IMAGE_MAX_DIM = 640
 
     # You can experiment with this number to see if it improves training
-    STEPS_PER_EPOCH = 2
+    STEPS_PER_EPOCH = 50
+    EPOCHS = 100
 
     # This is how often validation is run. If you are using too much hard drive space
     # on saved models (in the MODEL_DIR), try making this value larger.
@@ -190,8 +192,8 @@ class InferenceConfig(CigButtsConfig):
     DETECTION_MIN_CONFIDENCE = 0.9
 
 if __name__=='__main__':
-    debug = True
-    # debug = False
+    # debug = True
+    debug = False
     print(os.getcwd())
     # Set the ROOT_DIR variable to the root directory of the Mask_RCNN git repo
     ROOT_DIR = './'
@@ -222,11 +224,11 @@ if __name__=='__main__':
                                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/depth'))
     else:
         if config.Network_mode =='rgb':
-            dataset_train.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/coco_annotations.json'),
-                                    os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/rgb'))
+            dataset_train.load_data(os.path.join(os.getcwd(),  config.dataset_name + '/primitive_shapes/train/coco_annotations.json'),
+                                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/rgb'))
         elif config.Network_mode == 'depth':
-            dataset_train.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/coco_annotations.json'),
-                                    os.path.join(os.getcwd(), 'datasets/primitive_shapes/train/depth'))
+            dataset_train.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/coco_annotations.json'),
+                                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/depth'))
 
     dataset_train.prepare()
 
@@ -241,11 +243,11 @@ if __name__=='__main__':
                                   os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/depth'))
     else:
         if config.Network_mode == 'rgb':
-            dataset_val.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/depth'))
+            dataset_val.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/depth'))
         elif config.Network_mode == 'depth':
-            dataset_val.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), 'datasets/primitive_shapes/val/depth'))
+            dataset_val.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/depth'))
 
     dataset_val.prepare()
 
@@ -259,11 +261,11 @@ if __name__=='__main__':
                                   os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/depth'))
     else:
         if config.Network_mode == 'rgb':
-            dataset_test.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/rgb'))
+            dataset_test.load_data(os.path.join(os.getcwd(), config.dataset_name  + '/primitive_shapes/test/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/rgb'))
         elif config.Network_mode == 'depth':
-            dataset_test.load_data(os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), 'datasets/primitive_shapes/test/depth'))
+            dataset_test.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/coco_annotations.json'),
+                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/depth'))
     dataset_test.prepare()
 
     dataset = dataset_train
@@ -325,7 +327,7 @@ if __name__=='__main__':
         start_train = time.time()
         model.train(dataset_train, dataset_val,
                     learning_rate=config.LEARNING_RATE * 10,
-                    epochs=3,
+                    epochs=config.EPOCHS,
                     layers="all")
         end_train = time.time()
         minutes = round((end_train - start_train) / 60, 2)
@@ -363,9 +365,9 @@ if __name__=='__main__':
                 os.mkdir(os.path.join('datasets_debug', 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
         else:
             if config.Network_mode == 'rgb':
-                os.mkdir(os.path.join('datasets', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
+                os.mkdir(os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
             elif config.Network_mode == 'depth':
-                os.mkdir(os.path.join('datasets', 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
+                os.mkdir(os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
         for ind in dataset_test.image_ids:
             # if ind == 3:
             #     break
@@ -413,25 +415,3 @@ if __name__=='__main__':
                 dice_total += [dice_class]
                 print(general_utils.id_category[ind], dice_class)
         print('mean Dice:', np.mean(dice_total))
-
-
-        # real_test_dir = 'datasets/primitive_shapes/test/rgb'
-        # image_paths = []
-        # for filename in os.listdir(real_test_dir):
-        #     if os.path.splitext(filename)[1].lower() in ['.png', '.jpg', '.jpeg']:
-        #         image_paths.append(os.path.join(real_test_dir, filename))
-        #
-        # my_time = str(time.time())
-        # os.mkdir(os.path.join(image_paths[0].split('color_image')[0], 'predict' + my_time))
-        # ious = []
-        # for image_path in image_paths:
-        #     img = skimage.io.imread(image_path)
-        #     img_arr = np.array(img)
-        #     results = model.detect([img_arr], verbose=1)
-        #     r = results[0]
-        #     mask = r[mask]
-        #     mask, class_ids = dataset.load_mask(image_id)
-        #     ious.append(iou_coef(results))
-        #
-        #     visualize.display_instances(img, r['rois'], r['masks'], r['class_ids'],
-        #                                 dataset_val.class_names, r['scores'], title=image_path, my_time=my_time, figsize=(20, 20))
