@@ -38,11 +38,11 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "rgb_dataold"
+    NAME = "depth_dataold_debug"
     dataset_name = 'datasets_old'
     # NAME = "cig_butts"
-    # Network_mode = 'depth' # rgb, depth, rgb_depth
-    Network_mode = 'rgb' # rgb, depth, rgb_depth
+    Network_mode = 'depth' # rgb, depth, rgb_depth
+    # Network_mode = 'rgb' # rgb, depth, rgb_depth
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
@@ -82,8 +82,10 @@ class CigButtsConfig(Config):
         IMAGE_CHANNEL_COUNT = 3
     if Network_mode == 'depth':
         IMAGE_CHANNEL_COUNT = 1
+        MEAN_PIXEL = np.array([123.7])
     if Network_mode == 'rgb_depth':
         IMAGE_CHANNEL_COUNT = 4
+        MEAN_PIXEL = np.array([123.7, 116.8, 103.9, 116.8])
 class CocoLikeDataset(utils.Dataset):
     """ Generates a COCO-like dataset, i.e. an image dataset annotated in the style of the COCO dataset.
         See http://cocodataset.org/#home for more information.
@@ -192,8 +194,8 @@ class InferenceConfig(CigButtsConfig):
     DETECTION_MIN_CONFIDENCE = 0.9
 
 if __name__=='__main__':
-    # debug = True
-    debug = False
+    debug = True
+    # debug = False
     print(os.getcwd())
     # Set the ROOT_DIR variable to the root directory of the Mask_RCNN git repo
     ROOT_DIR = './'
@@ -295,9 +297,14 @@ if __name__=='__main__':
             # Load weights trained on MS COCO, but skip layers that
             # are different due to the different number of classes
             # See README for instructions to download the COCO weights
-            model.load_weights(COCO_MODEL_PATH, by_name=True,
-                               exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",
-                                        "mrcnn_bbox", "mrcnn_mask"])
+            if config.Network_mode == 'rgb':
+                model.load_weights(COCO_MODEL_PATH, by_name=True,
+                                   exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",
+                                            "mrcnn_bbox", "mrcnn_mask"])
+            elif config.Network_mode == 'depth':
+                model.load_weights(COCO_MODEL_PATH, by_name=True,
+                                   exclude=["conv1", "mrcnn_class_logits", "mrcnn_bbox_fc",
+                                            "mrcnn_bbox", "mrcnn_mask"])
         elif init_with == "last":
             # Load the last model you trained and continue training
             model.load_weights(model.find_last(), by_name=True)
@@ -369,8 +376,9 @@ if __name__=='__main__':
             elif config.Network_mode == 'depth':
                 os.mkdir(os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
         for ind in dataset_test.image_ids:
-            # if ind == 3:
-            #     break
+            if debug:
+                if ind == 3:
+                    break
             print(ind, ' from: ', len(dataset_test.image_ids))
             img = dataset_test.load_image(ind)
             img_arr = np.array(img)
