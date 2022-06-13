@@ -40,6 +40,13 @@ class CigButtsConfig(Config):
     # Give the configuration a recognizable name
     NAME = "depth_dataold_debug"
     dataset_name = 'datasets_old'
+    Train = True
+    # Train = False
+    Test = True
+    # Test = False
+    debug = True
+    # debug = False
+
     # NAME = "cig_butts"
     Network_mode = 'depth' # rgb, depth, rgb_depth
     # Network_mode = 'rgb' # rgb, depth, rgb_depth
@@ -194,8 +201,6 @@ class InferenceConfig(CigButtsConfig):
     DETECTION_MIN_CONFIDENCE = 0.9
 
 if __name__=='__main__':
-    debug = True
-    # debug = False
     print(os.getcwd())
     # Set the ROOT_DIR variable to the root directory of the Mask_RCNN git repo
     ROOT_DIR = './'
@@ -217,7 +222,7 @@ if __name__=='__main__':
     config.display()
 
     dataset_train = CocoLikeDataset(network_mode=config.Network_mode)
-    if debug:
+    if config.debug:
         if config.Network_mode =='rgb':
             dataset_train.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
                                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/rgb'))
@@ -236,7 +241,7 @@ if __name__=='__main__':
 
 
     dataset_val = CocoLikeDataset(network_mode=config.Network_mode)
-    if debug:
+    if config.debug:
         if config.Network_mode == 'rgb':
             dataset_val.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
                                   os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/rgb'))
@@ -254,7 +259,7 @@ if __name__=='__main__':
     dataset_val.prepare()
 
     dataset_test = CocoLikeDataset(network_mode=config.Network_mode)
-    if debug:
+    if config.debug:
         if config.Network_mode == 'rgb':
             dataset_test.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/coco_annotations.json'),
                                   os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/rgb'))
@@ -277,10 +282,8 @@ if __name__=='__main__':
     #     mask, class_ids = dataset.load_mask(image_id)
     #     visualize.display_top_masks(image, mask, class_ids, dataset.class_names)
 
-    # Train = True
-    Train = False
-    Test = True
-    if Train:
+
+    if config.Train:
         #...................................Start Trainng...................................................
         # Create model in training mode
         model = modellib.MaskRCNN(mode="training", config=config,
@@ -340,7 +343,7 @@ if __name__=='__main__':
         minutes = round((end_train - start_train) / 60, 2)
         print('Training took {0} minutes'.format(minutes))
         # #######################################
-    if Test:
+    if config.Test:
         print('Testing')
         #.............................................Finish Trainning...................................................
         inference_config = InferenceConfig()
@@ -365,7 +368,7 @@ if __name__=='__main__':
         dices = np.empty((0, config.NUM_CLASSES - 1), float)
 
         my_time = str(time.time())
-        if debug:
+        if config.debug:
             if config.Network_mode == 'rgb':
                 os.mkdir(os.path.join('datasets_debug', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
             elif config.Network_mode == 'depth':
@@ -376,7 +379,7 @@ if __name__=='__main__':
             elif config.Network_mode == 'depth':
                 os.mkdir(os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
         for ind in dataset_test.image_ids:
-            if debug:
+            if config.debug:
                 if ind == 3:
                     break
             print(ind, ' from: ', len(dataset_test.image_ids))
@@ -401,7 +404,7 @@ if __name__=='__main__':
                 mask_target_final[:, :, class_id] += mask_target[:, :, index]
             visualize.display_instances(img, r['rois'], r['masks'], r['class_ids'],
                                         dataset_test.class_names, r['scores'], title=ind, my_time=my_time,
-                                        figsize=(15, 15),debug=debug, config=config)
+                                        figsize=(15, 15),debug=config.debug, config=config)
 
             ious = np.append(ious, np.array([iou_coef(mask_target_final, mask_pred_final, smooth=0)]), axis=0)
             dices = np.append(dices, np.array([dice_coef(mask_target_final, mask_pred_final, smooth=0)]), axis=0)

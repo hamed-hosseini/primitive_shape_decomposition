@@ -186,6 +186,7 @@ def display_instances(image, boxes, masks, class_ids, class_names,
                                     os.path.join('predict' + my_time, str(title)))
     # print(new_path)
     plt.savefig(new_path)
+    plt.close()
 
 def display_differences(image,
                         gt_box, gt_class_id, gt_mask,

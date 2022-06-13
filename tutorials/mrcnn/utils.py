@@ -361,7 +361,8 @@ class Dataset(object):
         if self.network_mode == 'rgb':
             image = skimage.io.imread(self.image_info[image_id]['path'])
         elif self.network_mode == 'depth':
-            image = skimage.io.imread(self.image_info[image_id]['path'].replace('color_image', 'depth_image'))
+            image = skimage.io.imread(self.image_info[image_id]['path'].replace('color_image', 'depth_image'), as_gray=True)
+            image = np.expand_dims(image, axis=2)
         # If grayscale. Convert to RGB for consistency.
         #hmd think doesnt need!!
         # if image.ndim != 3:
