@@ -1,7 +1,0 @@
-PyTorch
-opencv
-numpy
-matplotlib
-tqdm
-scikit-image
-shapely

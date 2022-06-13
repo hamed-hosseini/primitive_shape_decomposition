@@ -246,7 +246,7 @@ if __name__=='__main__':
     else:
         if config.Network_mode == 'rgb':
             dataset_val.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/depth'))
+                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/rgb'))
         elif config.Network_mode == 'depth':
             dataset_val.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
                                   os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/depth'))
@@ -277,8 +277,8 @@ if __name__=='__main__':
     #     mask, class_ids = dataset.load_mask(image_id)
     #     visualize.display_top_masks(image, mask, class_ids, dataset.class_names)
 
-    Train = True
-    # Train = False
+    # Train = True
+    Train = False
     Test = True
     if Train:
         #...................................Start Trainng...................................................

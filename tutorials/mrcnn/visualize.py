@@ -179,10 +179,10 @@ def display_instances(image, boxes, masks, class_ids, class_names,
                                     os.path.join('predict' + my_time, str(title)))
     else:
         if config.Network_mode == 'rgb':
-            new_path = os.path.join('datasets', 'primitive_shapes', 'test', 'rgb',
+            new_path = os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'rgb',
                                     os.path.join('predict' + my_time, str(title)))
         elif config.Network_mode == 'depth':
-            new_path = os.path.join('datasets', 'primitive_shapes', 'test', 'depth',
+            new_path = os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'depth',
                                     os.path.join('predict' + my_time, str(title)))
     # print(new_path)
     plt.savefig(new_path)
