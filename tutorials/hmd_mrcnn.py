@@ -38,18 +38,18 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "depth_dataold_debug"
-    dataset_name = 'datasets_old'
-    Train = True
-    # Train = False
+    NAME = "rgb_dataold"
+    dataset_name = 'datasets_one'
+    # Train = True
+    Train = False
     Test = True
     # Test = False
-    debug = True
-    # debug = False
+    # debug = True
+    debug = False
 
     # NAME = "cig_butts"
-    Network_mode = 'depth' # rgb, depth, rgb_depth
-    # Network_mode = 'rgb' # rgb, depth, rgb_depth
+    # Network_mode = 'depth' # rgb, depth, rgb_depth
+    Network_mode = 'rgb' # rgb, depth, rgb_depth
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
@@ -221,62 +221,9 @@ if __name__=='__main__':
     config = CigButtsConfig()
     config.display()
 
-    dataset_train = CocoLikeDataset(network_mode=config.Network_mode)
-    if config.debug:
-        if config.Network_mode =='rgb':
-            dataset_train.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
-                                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/rgb'))
-        elif config.Network_mode == 'depth':
-            dataset_train.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
-                                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/depth'))
-    else:
-        if config.Network_mode =='rgb':
-            dataset_train.load_data(os.path.join(os.getcwd(),  config.dataset_name + '/primitive_shapes/train/coco_annotations.json'),
-                                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/rgb'))
-        elif config.Network_mode == 'depth':
-            dataset_train.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/coco_annotations.json'),
-                                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/depth'))
-
-    dataset_train.prepare()
 
 
-    dataset_val = CocoLikeDataset(network_mode=config.Network_mode)
-    if config.debug:
-        if config.Network_mode == 'rgb':
-            dataset_val.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/rgb'))
-        elif config.Network_mode == 'depth':
-            dataset_val.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/depth'))
-    else:
-        if config.Network_mode == 'rgb':
-            dataset_val.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/rgb'))
-        elif config.Network_mode == 'depth':
-            dataset_val.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/depth'))
-
-    dataset_val.prepare()
-
-    dataset_test = CocoLikeDataset(network_mode=config.Network_mode)
-    if config.debug:
-        if config.Network_mode == 'rgb':
-            dataset_test.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/rgb'))
-        elif config.Network_mode == 'depth':
-            dataset_test.load_data(os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/depth'))
-    else:
-        if config.Network_mode == 'rgb':
-            dataset_test.load_data(os.path.join(os.getcwd(), config.dataset_name  + '/primitive_shapes/test/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/rgb'))
-        elif config.Network_mode == 'depth':
-            dataset_test.load_data(os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/coco_annotations.json'),
-                                  os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/depth'))
-    dataset_test.prepare()
-
-    dataset = dataset_train
-    image_ids = np.random.choice(dataset.image_ids, 4)
+    # image_ids = np.random.choice(dataset_.image_ids, 4)
     # for image_id in image_ids:
     #     image = dataset.load_image(image_id)
     #     mask, class_ids = dataset.load_mask(image_id)
@@ -284,6 +231,49 @@ if __name__=='__main__':
 
 
     if config.Train:
+        dataset_train = CocoLikeDataset(network_mode=config.Network_mode)
+        if config.debug:
+            if config.Network_mode == 'rgb':
+                dataset_train.load_data(
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/rgb'))
+            elif config.Network_mode == 'depth':
+                dataset_train.load_data(
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/depth'))
+        else:
+            if config.Network_mode == 'rgb':
+                dataset_train.load_data(
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/coco_annotations.json'),
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/rgb'))
+            elif config.Network_mode == 'depth':
+                dataset_train.load_data(
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/coco_annotations.json'),
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/depth'))
+
+        dataset_train.prepare()
+        dataset_val = CocoLikeDataset(network_mode=config.Network_mode)
+        if config.debug:
+            if config.Network_mode == 'rgb':
+                dataset_val.load_data(
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/rgb'))
+            elif config.Network_mode == 'depth':
+                dataset_val.load_data(
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/depth'))
+        else:
+            if config.Network_mode == 'rgb':
+                dataset_val.load_data(
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/rgb'))
+            elif config.Network_mode == 'depth':
+                dataset_val.load_data(
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/depth'))
+
+        dataset_val.prepare()
+
         #...................................Start Trainng...................................................
         # Create model in training mode
         model = modellib.MaskRCNN(mode="training", config=config,
@@ -346,6 +336,28 @@ if __name__=='__main__':
     if config.Test:
         print('Testing')
         #.............................................Finish Trainning...................................................
+
+        dataset_test = CocoLikeDataset(network_mode=config.Network_mode)
+        if config.debug:
+            if config.Network_mode == 'rgb':
+                dataset_test.load_data(
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/coco_annotations.json'),
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/rgb'))
+            elif config.Network_mode == 'depth':
+                dataset_test.load_data(
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/coco_annotations.json'),
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/depth'))
+        else:
+            if config.Network_mode == 'rgb':
+                dataset_test.load_data(
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/coco_annotations.json'),
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/rgb'))
+            elif config.Network_mode == 'depth':
+                dataset_test.load_data(
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/coco_annotations.json'),
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/depth'))
+        dataset_test.prepare()
+
         inference_config = InferenceConfig()
 
         # Recreate the model in inference mode
