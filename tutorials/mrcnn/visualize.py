@@ -185,7 +185,10 @@ def display_instances(image, boxes, masks, class_ids, class_names,
             new_path = os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'depth',
                                     os.path.join('predict' + my_time, str(title)))
     # print(new_path)
-    plt.savefig(new_path)
+    if config.Network_mode == 'depth':
+        plt.imsave(new_path, edges_DR, cmap='gray')
+    else:
+        plt.savefig(new_path)
     plt.close()
 
 def display_differences(image,

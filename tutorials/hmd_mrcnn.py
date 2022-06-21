@@ -38,7 +38,7 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "rgb_dataold"
+    NAME = "depth_dataold"
     dataset_name = 'datasets_old'
     Train = True
     # Train = False
