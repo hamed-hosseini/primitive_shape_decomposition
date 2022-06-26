@@ -4,7 +4,7 @@ import json
 import numpy as np
 import time
 from PIL import Image, ImageDraw
-import tensorflow
+import tensorflow as tf
 import keras
 from keras import backend as K
 from matplotlib import pyplot as plt
@@ -16,6 +16,13 @@ import  pandas as pd
 import skimage
 import general_utils
 
+def scheduler(epoch):
+    if epoch < config.EPOCHS / 3:
+        return config.LEARNING_RATE
+    elif epoch < 2 * config.EPOCHS / 3:
+        return config.LEARNING_RATE * 0.1
+    else:
+        return config.LEARNING_RATE * 0.01
 
 def dice_coef(y_true, y_pred, smooth=1):
     intersection = np.sum(y_true * y_pred, axis=(0, 1))
@@ -47,7 +54,7 @@ class CigButtsConfig(Config):
     debug = True
     # debug = False
     # train_mode = 'transfer' # transfer or all
-    train_mode = 'all'
+    train_mode = 'transfer'
     # Network_mode = 'depth' # rgb, depth, rgb_depth
     Network_mode = 'rgb' # rgb, depth, rgb_depth
     # Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
@@ -322,7 +329,7 @@ if __name__=='__main__':
             # Load the last model you trained and continue training
             model.load_weights(model.find_last(), by_name=True)
 
-
+        callback = keras.callbacks.LearningRateScheduler(scheduler)
         if config.train_mode == 'transfer':
             ###########ONLY HEADS#########
             # Train the head branches
@@ -331,9 +338,9 @@ if __name__=='__main__':
             # which layers to train by name pattern.
             start_train = time.time()
             model.train(dataset_train, dataset_val,
-                        learning_rate=config.LEARNING_RATE * 10,
-                        epochs=20,
-                        layers='heads')
+                        learning_rate=config.LEARNING_RATE,
+                        epochs=config.EPOCHS,
+                        layers='heads', custom_callbacks=[callback])
             end_train = time.time()
             minutes = round((end_train - start_train) / 60, 2)
             print('Training took {0} minutes'.format(minutes))
@@ -347,9 +354,9 @@ if __name__=='__main__':
             # train by name pattern.
             start_train = time.time()
             model.train(dataset_train, dataset_val,
-                        learning_rate=config.LEARNING_RATE * 10,
+                        learning_rate=config.LEARNING_RATE,
                         epochs=config.EPOCHS,
-                        layers="all")
+                        layers="all", custom_callbacks=[callback])
             end_train = time.time()
             minutes = round((end_train - start_train) / 60, 2)
             print('Training took {0} minutes'.format(minutes))
