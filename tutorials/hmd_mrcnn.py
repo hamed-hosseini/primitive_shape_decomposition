@@ -38,16 +38,16 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "rgb_dataold"
+    NAME = "rgb_dataold_transfer"
     dataset_name = 'datasets_one'
-    # Train = True
-    Train = False
+    Train = True
+    # Train = False
     Test = True
     # Test = False
-    # debug = True
-    debug = False
-
-    # NAME = "cig_butts"
+    debug = True
+    # debug = False
+    # train_mode = 'transfer' # transfer or all
+    train_mode = 'all'
     # Network_mode = 'depth' # rgb, depth, rgb_depth
     Network_mode = 'rgb' # rgb, depth, rgb_depth
     # Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
@@ -68,7 +68,7 @@ class CigButtsConfig(Config):
     IMAGE_MAX_DIM = 640
 
     # You can experiment with this number to see if it improves training
-    STEPS_PER_EPOCH = 50
+    STEPS_PER_EPOCH = 20
     EPOCHS = 100
 
     # This is how often validation is run. If you are using too much hard drive space
@@ -323,39 +323,41 @@ if __name__=='__main__':
             model.load_weights(model.find_last(), by_name=True)
 
 
-        ###########ONLY HEADS#########
-        # Train the head branches
-        # Passing layers="heads" freezes all layers except the head
-        # layers. You can also pass a regular expression to select
-        # which layers to train by name pattern.
-        # start_train = time.time()
-        # model.train(dataset_train, dataset_val,
-        #             learning_rate=config.LEARNING_RATE,
-        #             epochs=1,
-        #             layers='heads')
-        # end_train = time.time()
-        # minutes = round((end_train - start_train) / 60, 2)
-        # print('Training took {0} minutes'.format(minutes))
+        if config.train_mode == 'transfer':
+            ###########ONLY HEADS#########
+            # Train the head branches
+            # Passing layers="heads" freezes all layers except the head
+            # layers. You can also pass a regular expression to select
+            # which layers to train by name pattern.
+            start_train = time.time()
+            model.train(dataset_train, dataset_val,
+                        learning_rate=config.LEARNING_RATE * 10,
+                        epochs=20,
+                        layers='heads')
+            end_train = time.time()
+            minutes = round((end_train - start_train) / 60, 2)
+            print('Training took {0} minutes'.format(minutes))
+
+        elif config.train_mode == 'all':
+            # #########ALL LAYERS#############
+            #
+            # Fine tune all layers
+            # Passing layers="all" trains all layers. You can also
+            # pass a regular expression to select which layers to
+            # train by name pattern.
+            start_train = time.time()
+            model.train(dataset_train, dataset_val,
+                        learning_rate=config.LEARNING_RATE * 10,
+                        epochs=config.EPOCHS,
+                        layers="all")
+            end_train = time.time()
+            minutes = round((end_train - start_train) / 60, 2)
+            print('Training took {0} minutes'.format(minutes))
 
 
-        # #########ALL LAYERS#############
-        #
-        # Fine tune all layers
-        # Passing layers="all" trains all layers. You can also
-        # pass a regular expression to select which layers to
-        # train by name pattern.
-        start_train = time.time()
-        model.train(dataset_train, dataset_val,
-                    learning_rate=config.LEARNING_RATE * 10,
-                    epochs=config.EPOCHS,
-                    layers="all")
-        end_train = time.time()
-        minutes = round((end_train - start_train) / 60, 2)
-        print('Training took {0} minutes'.format(minutes))
-        # #######################################
+    #.............................................Finish Trainning...................................................
     if config.Test:
         print('Testing')
-        #.............................................Finish Trainning...................................................
 
         dataset_test = CocoLikeDataset(network_mode=config.Network_mode)
         if config.debug:
