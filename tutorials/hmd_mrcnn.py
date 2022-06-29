@@ -45,16 +45,16 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "rgb_dataold_transfer"
-    dataset_name = 'datasets_one'
-    Train = True
-    # Train = False
+    NAME = "rgb_datasets_v1"
+    dataset_name = 'datasets_v1'
+    # Train = True
+    Train = False
     Test = True
     # Test = False
-    debug = True
-    # debug = False
-    # train_mode = 'transfer' # transfer or all
-    train_mode = 'transfer'
+    # debug = True
+    debug = False
+    train_mode = 'all' # transfer or all
+    # train_mode = 'transfer'
     # Network_mode = 'depth' # rgb, depth, rgb_depth
     Network_mode = 'rgb' # rgb, depth, rgb_depth
     # Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
@@ -75,7 +75,7 @@ class CigButtsConfig(Config):
     IMAGE_MAX_DIM = 640
 
     # You can experiment with this number to see if it improves training
-    STEPS_PER_EPOCH = 20
+    STEPS_PER_EPOCH = 40
     EPOCHS = 100
 
     # This is how often validation is run. If you are using too much hard drive space
