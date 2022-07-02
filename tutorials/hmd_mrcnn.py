@@ -45,10 +45,10 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "rgb_datasets_v1"
-    dataset_name = 'datasets_v1'
-    # Train = True
-    Train = False
+    NAME = "rgb_datasets_v3"
+    dataset_name = 'datasets_v3'
+    Train = True
+    # Train = False
     Test = True
     # Test = False
     # debug = True
