@@ -75,10 +75,10 @@ class CigButtsConfig(Config):
     IMAGE_MAX_DIM = 640
 
     # You can experiment with this number to see if it improves training
-    # STEPS_PER_EPOCH = 40
-    STEPS_PER_EPOCH = 3
-    # EPOCHS = 100
-    EPOCHS = 3
+    STEPS_PER_EPOCH = 40
+    # STEPS_PER_EPOCH = 3
+    EPOCHS = 100
+    # EPOCHS = 3
 
     # This is how often validation is run. If you are using too much hard drive space
     # on saved models (in the MODEL_DIR), try making this value larger.
