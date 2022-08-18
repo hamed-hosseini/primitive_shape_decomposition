@@ -98,6 +98,8 @@ def display_instances(image, boxes, masks, class_ids, class_names,
     colors: (optional) An array or colors to use with each object
     captions: (optional) A list of strings to use as captions for each object
     """
+    if config.Network_mode == 'rgb_depth':
+        image = image[:,:,:-1]
     # Number of instances
     N = boxes.shape[0]
     if not N:
@@ -171,14 +173,14 @@ def display_instances(image, boxes, masks, class_ids, class_names,
     #     shutil.rmtree(os.path.join(path, 'train'))
     # new_path = os.path.join(os.path.join(title.split('color_image')[0], 'predict'+my_time), title.split('rgb/')[1])
     if debug:
-        if config.Network_mode == 'rgb':
+        if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth':
             new_path = os.path.join('datasets_debug', 'primitive_shapes', 'test', 'rgb',
                                     os.path.join('predict'+my_time, str(title)))
         elif config.Network_mode == 'depth':
             new_path = os.path.join('datasets_debug', 'primitive_shapes', 'test', 'depth',
                                     os.path.join('predict' + my_time, str(title)))
     else:
-        if config.Network_mode == 'rgb':
+        if config.Network_mode == 'rgb' or 'rgb_depth':
             new_path = os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'rgb',
                                     os.path.join('predict' + my_time, str(title)))
         elif config.Network_mode == 'depth':
@@ -186,7 +188,7 @@ def display_instances(image, boxes, masks, class_ids, class_names,
                                     os.path.join('predict' + my_time, str(title)))
     # print(new_path)
     if config.Network_mode == 'depth':
-        plt.imsave(new_path, edges_DR, cmap='gray')
+        plt.imsave(new_path, cmap='gray')
     else:
         plt.savefig(new_path)
     plt.close()

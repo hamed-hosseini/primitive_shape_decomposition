@@ -47,8 +47,8 @@ class CigButtsConfig(Config):
     # Give the configuration a recognizable name
     NAME = "rgbd_datasets_v1"
     dataset_name = 'datasets_v1'
-    Train = True
-    # Train = False
+    # Train = True
+    Train = False
     Test = True
     # Test = False
     # debug = True
@@ -422,18 +422,18 @@ if __name__=='__main__':
 
         my_time = str(time.time())
         if config.debug:
-            if config.Network_mode == 'rgb':
+            if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth' :
                 os.mkdir(os.path.join('datasets_debug', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
             elif config.Network_mode == 'depth':
                 os.mkdir(os.path.join('datasets_debug', 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
         else:
-            if config.Network_mode == 'rgb':
+            if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth':
                 os.mkdir(os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
             elif config.Network_mode == 'depth':
                 os.mkdir(os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
         for ind in dataset_test.image_ids:
-            if config.debug:
-                if ind == 3:
+            if config.debug or True:
+                if ind == 4:
                     break
             print(ind, ' from: ', len(dataset_test.image_ids))
             img = dataset_test.load_image(ind)
