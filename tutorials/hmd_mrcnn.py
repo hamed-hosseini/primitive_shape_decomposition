@@ -45,7 +45,7 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "test_mean_pixel"
+    NAME = "rgbd_datasets_v1"
     dataset_name = 'datasets_v1'
     Train = True
     # Train = False
