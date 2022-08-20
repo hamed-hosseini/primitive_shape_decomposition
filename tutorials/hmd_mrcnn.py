@@ -45,10 +45,10 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "rgbd_datasets_v1"
+    NAME = "test_mean_pixel"
     dataset_name = 'datasets_v1'
-    # Train = True
-    Train = False
+    Train = True
+    # Train = False
     Test = True
     # Test = False
     # debug = True
@@ -94,21 +94,22 @@ class CigButtsConfig(Config):
     POST_NMS_ROIS_INFERENCE = 500
     POST_NMS_ROIS_TRAINING = 1000
     USE_MINI_MASK = False
-
+    compute_mean_pixel_size = True
     if Network_mode == 'rgb':
         IMAGE_CHANNEL_COUNT = 3
+        MEAN_PIXEL = np.array([254.1749290922619, 254.1700030810805, 253.69742554253475])
     if Network_mode == 'depth':
         IMAGE_CHANNEL_COUNT = 1
-        MEAN_PIXEL = np.array([123.7])
+        MEAN_PIXEL = np.array([0.12916169411272974])
     if Network_mode == 'rgb_depth':
         IMAGE_CHANNEL_COUNT = 4
-        MEAN_PIXEL = np.array([123.7, 116.8, 103.9, 116.8])
+        MEAN_PIXEL = np.array([254.1749290922619, 254.1700030810805, 253.69742554253475, 0.12916169411272974])
 class CocoLikeDataset(utils.Dataset):
     """ Generates a COCO-like dataset, i.e. an image dataset annotated in the style of the COCO dataset.
         See http://cocodataset.org/#home for more information.
     """
 
-    def load_data(self, annotation_json, images_dir):
+    def load_data(self, annotation_json, images_dir, mean_pixel_evaluate=False):
         """ Load the coco-like dataset from json
         Args:
             annotation_json: The path to the coco annotations json file
@@ -141,6 +142,7 @@ class CocoLikeDataset(utils.Dataset):
 
         # Get all images and add them to the dataset
         seen_images = {}
+        sum_R, sum_G, sum_B, sum_D = [], [], [], []
         for image in coco_json['images']:
             image_id = image['id']
             if image_id in seen_images:
@@ -172,6 +174,22 @@ class CocoLikeDataset(utils.Dataset):
                     height=image_height,
                     annotations=image_annotations
                 )
+                if mean_pixel_evaluate:
+                    my_image = self.load_image(-1)
+                    if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth':
+                        sum_R += [my_image.mean(axis=(0, 1))[0]]
+                        sum_G += [my_image.mean(axis=(0, 1))[1]]
+                        sum_B += [my_image.mean(axis=(0, 1))[2]]
+                    if config.Network_mode == 'depth' or config.Network_mode == 'rgb_depth':
+                        sum_D += [my_image.mean(axis=(0, 1))[3]]
+        if mean_pixel_evaluate:
+            if config.Network_mode == 'rgb':
+                config.MEAN_PIXEL = np.array([np.mean(sum_R), np.mean(sum_G), np.mean(sum_B)])
+            elif config.Network_mode == 'rgb_depth':
+                config.MEAN_PIXEL = np.array([np.mean(sum_R), np.mean(sum_G), np.mean(sum_B),np.mean(sum_D)])
+            elif config.Network_mode == 'depth':
+                config.MEAN_PIXEL = np.array([np.mean(sum_D)])
+
 
     def load_mask(self, image_id):
         """ Load instance masks for the given image.
@@ -250,28 +268,28 @@ if __name__=='__main__':
             if config.Network_mode == 'rgb':
                 dataset_train.load_data(
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
-                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/rgb'))
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/rgb'), mean_pixel_evaluate=config.compute_mean_pixel_size)
             elif config.Network_mode == 'depth':
                 dataset_train.load_data(
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
-                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/depth'))
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/depth'), mean_pixel_evaluate=config.compute_mean_pixel_size)
             elif config.Network_mode =='rgb_depth':
                 dataset_train.load_data(
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
-                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train'))
+                    os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train'), mean_pixel_evaluate=config.compute_mean_pixel_size)
         else:
             if config.Network_mode == 'rgb':
                 dataset_train.load_data(
                     os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/coco_annotations.json'),
-                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/rgb'))
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/rgb'), mean_pixel_evaluate=config.compute_mean_pixel_size)
             elif config.Network_mode == 'depth':
                 dataset_train.load_data(
                     os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/coco_annotations.json'),
-                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/depth'))
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/depth'), mean_pixel_evaluate=config.compute_mean_pixel_size)
             elif config.Network_mode =='rgb_depth':
                 dataset_train.load_data(
                     os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/coco_annotations.json'),
-                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train'))
+                    os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train'), mean_pixel_evaluate=config.compute_mean_pixel_size)
         dataset_train.prepare()
         dataset_val = CocoLikeDataset(network_mode=config.Network_mode)
         if config.debug:
@@ -432,7 +450,7 @@ if __name__=='__main__':
             elif config.Network_mode == 'depth':
                 os.mkdir(os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
         for ind in dataset_test.image_ids:
-            if config.debug or True:
+            if config.debug:
                 if ind == 4:
                     break
             print(ind, ' from: ', len(dataset_test.image_ids))
