@@ -45,19 +45,19 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "rgbd_datasets_v1"
+    NAME = "debug_rgbd_normalize_datasets_v1"
     dataset_name = 'datasets_v1'
     Train = True
     # Train = False
     Test = True
     # Test = False
-    # debug = True
-    debug = False
+    debug = True
+    # debug = False
     train_mode = 'all' # transfer or all
     # train_mode = 'transfer'
     # Network_mode = 'depth' # rgb, depth, rgb_depth
-    # Network_mode = 'rgb' # rgb, depth, rgb_depth
-    Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
+    Network_mode = 'rgb' # rgb, depth, rgb_depth
+    # Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
@@ -75,7 +75,7 @@ class CigButtsConfig(Config):
     IMAGE_MAX_DIM = 640
 
     # You can experiment with this number to see if it improves training
-    STEPS_PER_EPOCH = 40
+    STEPS_PER_EPOCH = 2
     # STEPS_PER_EPOCH = 3
     EPOCHS = 100
     # EPOCHS = 3
@@ -95,6 +95,7 @@ class CigButtsConfig(Config):
     POST_NMS_ROIS_TRAINING = 1000
     USE_MINI_MASK = False
     compute_mean_pixel_size = True
+    # compute_mean_pixel_size = False
     if Network_mode == 'rgb':
         IMAGE_CHANNEL_COUNT = 3
         MEAN_PIXEL = np.array([254.1749290922619, 254.1700030810805, 253.69742554253475])

@@ -2357,11 +2357,16 @@ class MaskRCNN():
         # Work-around for Windows: Keras fails on Windows when using
         # multiprocessing workers. See discussion here:
         # https://github.com/matterport/Mask_RCNN/issues/13#issuecomment-353124009
-        if os.name is 'nt':
-            workers = 0
-        else:
-            workers = multiprocessing.cpu_count()
+        #todo: Change it Khodaei yadet nare!!!!!!!!!!!!!!!
 
+        # if os.name is 'nt':
+        #     workers = 0
+        # else:
+        #     workers = multiprocessing.cpu_count()
+
+        workers = 1
+
+        #hmd
         self.keras_model.fit_generator(
             train_generator,
             initial_epoch=self.epoch,
@@ -2372,7 +2377,7 @@ class MaskRCNN():
             validation_steps=self.config.VALIDATION_STEPS,
             max_queue_size=100,
             workers=workers,
-            use_multiprocessing=True,
+            use_multiprocessing=False,
         )
         self.epoch = max(self.epoch, epochs)
 
@@ -2797,6 +2802,7 @@ def parse_image_meta_graph(meta):
 
 
 def mold_image(images, config):
+    #TODO: normalize hamed
     """Expects an RGB image (or array of images) and subtracts
     the mean pixel and converts it to float. Expects image
     colors in RGB order.
@@ -2805,6 +2811,7 @@ def mold_image(images, config):
 
 
 def unmold_image(normalized_images, config):
+    #TODO: normalize hamed
     """Takes a image normalized with mold() and returns the original."""
     return (normalized_images + config.MEAN_PIXEL).astype(np.uint8)
 
