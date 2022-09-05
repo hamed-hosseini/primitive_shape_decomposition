@@ -149,7 +149,9 @@ class CocoLikeDataset(utils.Dataset):
         mean_R_s, mean_G_s, mean_B_s, mean_D_s = [], [], [], []
         min_D_s ,max_D_s = [], []
         std_R_s, std_G_s, std_B_s, std_D_s = [], [], [], []
-        for image in coco_json['images']:
+        for indexx, image in enumerate(coco_json['images']):
+            if indexx % 500 == 0:
+                print(indexx)
             image_id = image['id']
             if image_id in seen_images:
                 print("Warning: Skipping duplicate image id: {}".format(image))
