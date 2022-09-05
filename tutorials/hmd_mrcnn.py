@@ -45,19 +45,19 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "debug_rgbd_normalize_datasets_v1"
+    NAME = "rgbd_normalize_minmax_datasets_v1"
     dataset_name = 'datasets_v1'
     Train = True
     # Train = False
     Test = True
     # Test = False
-    debug = True
-    # debug = False
+    # debug = True
+    debug = False
     train_mode = 'all' # transfer or all
     # train_mode = 'transfer'
     # Network_mode = 'depth' # rgb, depth, rgb_depth
-    Network_mode = 'rgb' # rgb, depth, rgb_depth
-    # Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
+    # Network_mode = 'rgb' # rgb, depth, rgb_depth
+    Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
@@ -75,7 +75,7 @@ class CigButtsConfig(Config):
     IMAGE_MAX_DIM = 640
 
     # You can experiment with this number to see if it improves training
-    STEPS_PER_EPOCH = 2
+    STEPS_PER_EPOCH = 50
     # STEPS_PER_EPOCH = 3
     EPOCHS = 100
     # EPOCHS = 3
@@ -105,6 +105,9 @@ class CigButtsConfig(Config):
     if Network_mode == 'rgb_depth':
         IMAGE_CHANNEL_COUNT = 4
         MEAN_PIXEL = np.array([254.1749290922619, 254.1700030810805, 253.69742554253475, 0.12916169411272974])
+    MIN_PIXEL = 0
+    MAX_PIXEL = 0
+    STD_PIXEL = 1
 class CocoLikeDataset(utils.Dataset):
     """ Generates a COCO-like dataset, i.e. an image dataset annotated in the style of the COCO dataset.
         See http://cocodataset.org/#home for more information.
@@ -143,7 +146,9 @@ class CocoLikeDataset(utils.Dataset):
 
         # Get all images and add them to the dataset
         seen_images = {}
-        sum_R, sum_G, sum_B, sum_D = [], [], [], []
+        mean_R_s, mean_G_s, mean_B_s, mean_D_s = [], [], [], []
+        min_D_s ,max_D_s = [], []
+        std_R_s, std_G_s, std_B_s, std_D_s = [], [], [], []
         for image in coco_json['images']:
             image_id = image['id']
             if image_id in seen_images:
@@ -177,19 +182,52 @@ class CocoLikeDataset(utils.Dataset):
                 )
                 if mean_pixel_evaluate:
                     my_image = self.load_image(-1)
+                    original_shape = my_image.shape
+                    my_image, window, scale, padding, crop = utils.resize_image(
+                        my_image,
+                        min_dim=config.IMAGE_MIN_DIM,
+                        min_scale=config.IMAGE_MIN_SCALE,
+                        max_dim=config.IMAGE_MAX_DIM,
+                        mode=config.IMAGE_RESIZE_MODE)
+
+
                     if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth':
-                        sum_R += [my_image.mean(axis=(0, 1))[0]]
-                        sum_G += [my_image.mean(axis=(0, 1))[1]]
-                        sum_B += [my_image.mean(axis=(0, 1))[2]]
+                        mean_R_s += [my_image.mean(axis=(0, 1))[0]]
+                        mean_G_s += [my_image.mean(axis=(0, 1))[1]]
+                        mean_B_s += [my_image.mean(axis=(0, 1))[2]]
+
+                        std_R_s += [my_image.std(axis=(0, 1))[0]]
+                        std_G_s += [my_image.std(axis=(0, 1))[1]]
+                        std_B_s += [my_image.std(axis=(0, 1))[2]]
                     if config.Network_mode == 'depth' or config.Network_mode == 'rgb_depth':
-                        sum_D += [my_image.mean(axis=(0, 1))[3]]
+                        mean_D_s += [my_image.mean(axis=(0, 1))[3]]
+                        min_D_s += [my_image.min(axis=(0, 1))[3]]
+                        max_D_s += [my_image.max(axis=(0, 1))[3]]
+                        std_D_s += [my_image.std(axis=(0, 1))[3]]
         if mean_pixel_evaluate:
             if config.Network_mode == 'rgb':
-                config.MEAN_PIXEL = np.array([np.mean(sum_R), np.mean(sum_G), np.mean(sum_B)])
+                config.MEAN_PIXEL = np.array([np.mean(mean_R_s), np.mean(mean_G_s), np.mean(mean_B_s)])
+                config.MIN_PIXEL = np.array([0, 0, 0])
+                config.MAX_PIXEL = np.array([255, 255, 255])
+                config.STD_PIXEL = np.array([np.std(std_R_s), np.std(std_G_s), np.std(std_B_s)])
             elif config.Network_mode == 'rgb_depth':
-                config.MEAN_PIXEL = np.array([np.mean(sum_R), np.mean(sum_G), np.mean(sum_B),np.mean(sum_D)])
+                config.MEAN_PIXEL = np.array([np.mean(mean_R_s), np.mean(mean_G_s), np.mean(mean_B_s), np.mean(mean_D_s)])
+                config.MIN_PIXEL = np.array([0, 0, 0, np.min(min_D_s)])
+                config.MAX_PIXEL = np.array([255, 255, 255, np.max(max_D_s)])
+                config.STD_PIXEL = np.array([np.std(std_R_s), np.std(std_G_s), np.std(std_B_s), np.std(std_D_s)])
             elif config.Network_mode == 'depth':
-                config.MEAN_PIXEL = np.array([np.mean(sum_D)])
+                config.MEAN_PIXEL = np.array([np.mean(mean_D_s)])
+                config.MIN_PIXEL = np.array([np.min(min_D_s)])
+                config.MAX_PIXEL = np.array([np.max(max_D_s)])
+                config.STD_PIXEL = np.array([np.std(std_D_s)])
+            # hmd: saving essential configes
+            with open('conf.json', 'w') as f:
+                my_dict = {}
+                my_dict['MEAN_PIXEL'] = config.MEAN_PIXEL.tolist()
+                my_dict['MIN_PIXEL'] = config.MIN_PIXEL.tolist()
+                my_dict['MAX_PIXEL'] = config.MAX_PIXEL.tolist()
+                my_dict['STD_PIXEL'] = config.STD_PIXEL.tolist()
+                json.dump(my_dict, f)
 
 
     def load_mask(self, image_id):
@@ -232,6 +270,12 @@ class InferenceConfig(CigButtsConfig):
     # IMAGE_MAX_DIM = 640
     DETECTION_MIN_CONFIDENCE = 0.8
     load_model = 'last' # model_name, last
+    with open('conf.json', 'r') as f:
+        my_dict = json.load(f)
+        MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
+        MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
+        MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
+        STD_PIXEL = np.array(my_dict['STD_PIXEL'])
 
 if __name__=='__main__':
     print(os.getcwd())

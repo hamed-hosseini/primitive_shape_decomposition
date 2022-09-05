@@ -2358,13 +2358,12 @@ class MaskRCNN():
         # multiprocessing workers. See discussion here:
         # https://github.com/matterport/Mask_RCNN/issues/13#issuecomment-353124009
         #todo: Change it Khodaei yadet nare!!!!!!!!!!!!!!!
-
-        # if os.name is 'nt':
-        #     workers = 0
-        # else:
-        #     workers = multiprocessing.cpu_count()
-
-        workers = 1
+        if os.name is 'nt':
+            workers = 0
+        else:
+            workers = multiprocessing.cpu_count()
+        #
+        # workers = 3
 
         #hmd
         self.keras_model.fit_generator(
@@ -2377,9 +2376,13 @@ class MaskRCNN():
             validation_steps=self.config.VALIDATION_STEPS,
             max_queue_size=100,
             workers=workers,
-            use_multiprocessing=False,
+            use_multiprocessing=True,
         )
         self.epoch = max(self.epoch, epochs)
+
+
+
+
 
     def mold_inputs(self, images):
         """Takes a list of images and modifies them to the format expected
@@ -2807,13 +2810,15 @@ def mold_image(images, config):
     the mean pixel and converts it to float. Expects image
     colors in RGB order.
     """
-    return images.astype(np.float32) - config.MEAN_PIXEL
+    return (images.astype(np.float32) - config.MIN_PIXEL) / (config.MAX_PIXEL - config.MIN_PIXEL)
+    # return images.astype(np.float32) - config.MEAN_PIXEL
 
 
 def unmold_image(normalized_images, config):
     #TODO: normalize hamed
     """Takes a image normalized with mold() and returns the original."""
-    return (normalized_images + config.MEAN_PIXEL).astype(np.uint8)
+    return ((normalized_images * (config.MAX_PIXEL - config.MIN_PIXEL)) + config.MIN_PIXEL).astype(np.uint8)
+    # return (normalized_images + config.MEAN_PIXEL).astype(np.uint8)
 
 
 ############################################################
