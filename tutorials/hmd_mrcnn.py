@@ -270,12 +270,6 @@ class InferenceConfig(CigButtsConfig):
     # IMAGE_MAX_DIM = 640
     DETECTION_MIN_CONFIDENCE = 0.8
     load_model = 'last' # model_name, last
-    with open('conf.json', 'r') as f:
-        my_dict = json.load(f)
-        MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
-        MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
-        MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
-        STD_PIXEL = np.array(my_dict['STD_PIXEL'])
 
 if __name__=='__main__':
     print(os.getcwd())
@@ -461,6 +455,12 @@ if __name__=='__main__':
         dataset_test.prepare()
 
         inference_config = InferenceConfig()
+        with open('conf.json', 'r') as f:
+            my_dict = json.load(f)
+            inference_config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
+            inference_config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
+            inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
+            inference_config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])
 
         # Recreate the model in inference mode
         model = modellib.MaskRCNN(mode="inference",
