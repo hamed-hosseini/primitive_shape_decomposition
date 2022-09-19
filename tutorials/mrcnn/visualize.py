@@ -123,7 +123,10 @@ def display_instances(image, boxes, masks, class_ids, class_names,
     ax.axis('off')
     ax.set_title(title)
 
-    masked_image = image.astype(np.uint32).copy()
+    if config.Network_mode == 'depth':
+        masked_image = image.copy()
+    else:
+        masked_image = image.astype(np.uint32).copy()
     for i in range(N):
         color = colors[i]
 
@@ -165,7 +168,10 @@ def display_instances(image, boxes, masks, class_ids, class_names,
             verts = np.fliplr(verts) - 1
             p = Polygon(verts, facecolor="none", edgecolor=color)
             ax.add_patch(p)
-    ax.imshow(masked_image.astype(np.uint8))
+    if config.Network_mode == 'depth':
+        ax.imshow(masked_image)
+    else:
+        ax.imshow(masked_image.astype(np.uint8))
     if auto_show:
         pass
         # plt.show()
@@ -180,7 +186,7 @@ def display_instances(image, boxes, masks, class_ids, class_names,
             new_path = os.path.join('datasets_debug', 'primitive_shapes', 'test', 'depth',
                                     os.path.join('predict' + my_time, str(title)))
     else:
-        if config.Network_mode == 'rgb' or 'rgb_depth':
+        if config.Network_mode == 'rgb' or config.Network_mode=='rgb_depth':
             new_path = os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'rgb',
                                     os.path.join('predict' + my_time, str(title)))
         elif config.Network_mode == 'depth':
@@ -188,7 +194,8 @@ def display_instances(image, boxes, masks, class_ids, class_names,
                                     os.path.join('predict' + my_time, str(title)))
     # print(new_path)
     if config.Network_mode == 'depth':
-        plt.imsave(new_path, cmap='gray')
+        plt.savefig(new_path, cmap='gray')
+        # plt.savefig(new_path)
     else:
         plt.savefig(new_path)
     plt.close()
