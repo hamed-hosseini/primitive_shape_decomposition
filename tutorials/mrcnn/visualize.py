@@ -169,7 +169,8 @@ def display_instances(image, boxes, masks, class_ids, class_names,
             p = Polygon(verts, facecolor="none", edgecolor=color)
             ax.add_patch(p)
     if config.Network_mode == 'depth':
-        ax.imshow(masked_image)
+        # pass
+        ax.imshow(masked_image[:,:,0])
     else:
         ax.imshow(masked_image.astype(np.uint8))
     if auto_show:
