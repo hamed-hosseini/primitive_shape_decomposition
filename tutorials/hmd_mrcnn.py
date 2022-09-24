@@ -45,7 +45,7 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "rgbd_datasets_v1_fortest"
+    NAME = "d_datasets_v1"
     dataset_name = 'datasets_v1'
     Train = True
     # Train = False
@@ -55,9 +55,9 @@ class CigButtsConfig(Config):
     debug = False
     train_mode = 'all' # transfer or all
     # train_mode = 'transfer'
-    # Network_mode = 'depth' # rgb, depth, rgb_depth
+    Network_mode = 'depth' # rgb, depth, rgb_depth
     # Network_mode = 'rgb' # rgb, depth, rgb_depth
-    Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
+    # Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
