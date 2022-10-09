@@ -66,16 +66,16 @@ def main(args, shapes):
     NUM_ITERATIONS = int(args.num_iterations)
     for iter in range(NUM_ITERATIONS):
         #hmd
-        # random.shuffle(shapes)
-        # shapes_sampled = random.sample(shapes, random.randint(1,min(8, len(shapes))))
-        # random.shuffle(shapes_sampled)
-        # num_obj = len(shapes_sampled)
+        random.shuffle(shapes)
+        shapes_sampled = random.sample(shapes, random.randint(1,min(1, len(shapes))))
+        random.shuffle(shapes_sampled)
+        num_obj = len(shapes_sampled)
         #hmd
 
         #base paper
-        random.shuffle(shapes)
-        shapes_sampled = shapes
-        num_obj = len(shapes_sampled)
+        # random.shuffle(shapes)
+        # shapes_sampled = shapes
+        # num_obj = len(shapes_sampled)
         #base paper
 
         obj_list = create_objects_from_shape(shapes_sampled, obj_mesh_dir)
@@ -136,7 +136,7 @@ def main(args, shapes):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Data Collection Process")
-    parser.add_argument("-n", "--num_iterations", default=10000, help="number of images to collect")
+    parser.add_argument("-n", "--num_iterations", default=100000, help="number of images to collect")
     parser.add_argument("-o", "--offset", default=0, help="start saving images starting from #offset image")
     parser.add_argument("-p", "--port", default=19997, help="port number")
     args = parser.parse_args()

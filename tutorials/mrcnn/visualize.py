@@ -180,14 +180,14 @@ def display_instances(image, boxes, masks, class_ids, class_names,
     #     shutil.rmtree(os.path.join(path, 'train'))
     # new_path = os.path.join(os.path.join(title.split('color_image')[0], 'predict'+my_time), title.split('rgb/')[1])
     if debug:
-        if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth':
+        if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth' or config.Network_mode == 'gray':
             new_path = os.path.join('datasets_debug', 'primitive_shapes', 'test', 'rgb',
                                     os.path.join('predict'+my_time, str(title)))
         elif config.Network_mode == 'depth':
             new_path = os.path.join('datasets_debug', 'primitive_shapes', 'test', 'depth',
                                     os.path.join('predict' + my_time, str(title)))
     else:
-        if config.Network_mode == 'rgb' or config.Network_mode=='rgb_depth':
+        if config.Network_mode == 'rgb' or config.Network_mode=='rgb_depth' or config.Network_mode == 'gray':
             new_path = os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'rgb',
                                     os.path.join('predict' + my_time, str(title)))
         elif config.Network_mode == 'depth':

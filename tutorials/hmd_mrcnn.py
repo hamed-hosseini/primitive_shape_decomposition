@@ -16,6 +16,12 @@ import pandas as pd
 import skimage
 import general_utils
 
+## ino chk konid.....
+import tensorflow as tf
+if tf.test.gpu_device_name():
+    print('Default GPU Device:{}'.format(tf.test.gpu_device_name()))
+else:
+   print("Please install GPU version of TF")
 def scheduler(epoch):
     if epoch < config.EPOCHS / 3:
         return config.LEARNING_RATE
@@ -45,7 +51,7 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "d_datasets_v1"
+    NAME = "gray_datasets_v1"
     dataset_name = 'datasets_v1'
     Train = True
     # Train = False
@@ -55,8 +61,9 @@ class CigButtsConfig(Config):
     debug = False
     train_mode = 'all' # transfer or all
     # train_mode = 'transfer'
-    Network_mode = 'depth' # rgb, depth, rgb_depth
-    # Network_mode = 'rgb' # rgb, depth, rgb_depth
+    # Network_mode = 'depth' # rgb, depth, rgb_depth
+    # Network_mode = 'rgb' # rgb, depth, rgb_depth, gray
+    Network_mode = 'gray' # rgb, depth, rgb_depth, gray
     # Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
@@ -99,6 +106,9 @@ class CigButtsConfig(Config):
     if Network_mode == 'rgb':
         IMAGE_CHANNEL_COUNT = 3
         MEAN_PIXEL = np.array([254.1749290922619, 254.1700030810805, 253.69742554253475])
+    if Network_mode == 'gray':
+        IMAGE_CHANNEL_COUNT = 3
+        MEAN_PIXEL = np.array([254.1749290922619])
     if Network_mode == 'depth':
         IMAGE_CHANNEL_COUNT = 1
         MEAN_PIXEL = np.array([0.12916169411272974])
@@ -146,7 +156,7 @@ class CocoLikeDataset(utils.Dataset):
 
         # Get all images and add them to the dataset
         seen_images = {}
-        mean_R_s, mean_G_s, mean_B_s, mean_D_s = [], [], [], []
+        mean_R_s, mean_G_s, mean_B_s, mean_D_s, mean_grays = [], [], [], [], []
         min_D_s ,max_D_s = [], []
         std_R_s, std_G_s, std_B_s, std_D_s = [], [], [], []
         for indexx, image in enumerate(coco_json['images']):
@@ -158,7 +168,7 @@ class CocoLikeDataset(utils.Dataset):
             else:
                 seen_images[image_id] = image
                 try:
-                    if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth':
+                    if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth' or config.Network_mode == 'gray':
                         image_file_name = image['file_name']
                     elif config.Network_mode == 'depth':
                         image_file_name = image['file_name'].replace('color', 'depth')
@@ -193,7 +203,7 @@ class CocoLikeDataset(utils.Dataset):
                         mode=config.IMAGE_RESIZE_MODE)
 
 
-                    if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth':
+                    if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth' :
                         mean_R_s += [my_image.mean(axis=(0, 1))[0]]
                         mean_G_s += [my_image.mean(axis=(0, 1))[1]]
                         mean_B_s += [my_image.mean(axis=(0, 1))[2]]
@@ -206,12 +216,20 @@ class CocoLikeDataset(utils.Dataset):
                         min_D_s += [my_image.min(axis=(0, 1))[3]]
                         max_D_s += [my_image.max(axis=(0, 1))[3]]
                         std_D_s += [my_image.std(axis=(0, 1))[3]]
+                    if config.Network_mode == 'gray':
+                        mean_grays += [my_image.mean(axis=(0, 1))[0]]
         if mean_pixel_evaluate:
             if config.Network_mode == 'rgb':
                 config.MEAN_PIXEL = np.array([np.mean(mean_R_s), np.mean(mean_G_s), np.mean(mean_B_s)])
                 config.MIN_PIXEL = np.array([0, 0, 0])
                 config.MAX_PIXEL = np.array([255, 255, 255])
                 config.STD_PIXEL = np.array([np.std(std_R_s), np.std(std_G_s), np.std(std_B_s)])
+            elif config.Network_mode == 'gray':
+                config.MEAN_PIXEL = np.array([np.mean(mean_grays)])
+                config.MIN_PIXEL = np.array([0])
+                config.MAX_PIXEL = np.array([255])
+                #should modify since it was useless didnt modified
+                config.STD_PIXEL = np.array([np.std(std_R_s)])
             elif config.Network_mode == 'rgb_depth':
                 config.MEAN_PIXEL = np.array([np.mean(mean_R_s), np.mean(mean_G_s), np.mean(mean_B_s), np.mean(mean_D_s)])
                 config.MIN_PIXEL = np.array([0, 0, 0, np.min(min_D_s)])
@@ -234,6 +252,11 @@ class CocoLikeDataset(utils.Dataset):
             with open('conf.json', 'r') as f:
                 my_dict = json.load(f)
                 if config.Network_mode == 'rgb':
+                    config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])[:-1]
+                    config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])[:-1]
+                    config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[:-1]
+                    config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])[:-1]
+                elif config.Network_mode == 'gray':
                     config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])[:-1]
                     config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])[:-1]
                     config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[:-1]
@@ -324,7 +347,7 @@ if __name__=='__main__':
     if config.Train:
         dataset_train = CocoLikeDataset(network_mode=config.Network_mode)
         if config.debug:
-            if config.Network_mode == 'rgb':
+            if config.Network_mode == 'rgb' or config.Network_mode == 'gray' :
                 dataset_train.load_data(
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/rgb'), mean_pixel_evaluate=config.compute_mean_pixel_size)
@@ -337,7 +360,7 @@ if __name__=='__main__':
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train/coco_annotations.json'),
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/train'), mean_pixel_evaluate=config.compute_mean_pixel_size)
         else:
-            if config.Network_mode == 'rgb':
+            if config.Network_mode == 'rgb' or config.Network_mode == 'gray' :
                 dataset_train.load_data(
                     os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/coco_annotations.json'),
                     os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/train/rgb'), mean_pixel_evaluate=config.compute_mean_pixel_size)
@@ -352,7 +375,7 @@ if __name__=='__main__':
         dataset_train.prepare()
         dataset_val = CocoLikeDataset(network_mode=config.Network_mode)
         if config.debug:
-            if config.Network_mode == 'rgb':
+            if config.Network_mode == 'rgb' or config.Network_mode == 'gray' :
                 dataset_val.load_data(
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/rgb'))
@@ -365,7 +388,7 @@ if __name__=='__main__':
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val/coco_annotations.json'),
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/val'))
         else:
-            if config.Network_mode == 'rgb':
+            if config.Network_mode == 'rgb' or config.Network_mode == 'gray' :
                 dataset_val.load_data(
                     os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/coco_annotations.json'),
                     os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/val/rgb'))
@@ -396,7 +419,7 @@ if __name__=='__main__':
             # Load weights trained on MS COCO, but skip layers that
             # are different due to the different number of classes
             # See README for instructions to download the COCO weights
-            if config.Network_mode == 'rgb':
+            if config.Network_mode == 'rgb' or config.Network_mode == 'gray' :
                 model.load_weights(COCO_MODEL_PATH, by_name=True,
                                    exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",
                                             "mrcnn_bbox", "mrcnn_mask"])
@@ -447,7 +470,7 @@ if __name__=='__main__':
 
         dataset_test = CocoLikeDataset(network_mode=config.Network_mode)
         if config.debug:
-            if config.Network_mode == 'rgb':
+            if config.Network_mode == 'rgb' or config.Network_mode == 'gray':
                 dataset_test.load_data(
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/coco_annotations.json'),
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/rgb'))
@@ -460,7 +483,7 @@ if __name__=='__main__':
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test/coco_annotations.json'),
                     os.path.join(os.getcwd(), 'datasets_debug/primitive_shapes/test'))
         else:
-            if config.Network_mode == 'rgb':
+            if config.Network_mode == 'rgb' or config.Network_mode == 'gray':
                 dataset_test.load_data(
                     os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/coco_annotations.json'),
                     os.path.join(os.getcwd(), config.dataset_name + '/primitive_shapes/test/rgb'))
@@ -477,7 +500,7 @@ if __name__=='__main__':
         inference_config = InferenceConfig()
         with open('conf.json', 'r') as f:
             my_dict = json.load(f)
-            if config.Network_mode == 'rgb_depth':
+            if config.Network_mode == 'rgb_depth' or config.Network_mode == 'gray':
                 inference_config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
                 inference_config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
                 inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
@@ -516,12 +539,12 @@ if __name__=='__main__':
 
         my_time = str(time.time())
         if config.debug:
-            if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth' :
+            if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth' or config.Network_mode == 'gray':
                 os.mkdir(os.path.join('datasets_debug', 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
             elif config.Network_mode == 'depth':
                 os.mkdir(os.path.join('datasets_debug', 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
         else:
-            if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth':
+            if config.Network_mode == 'rgb' or config.Network_mode == 'rgb_depth' or config.Network_mode == 'gray':
                 os.mkdir(os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'rgb', 'predict' + my_time))
             elif config.Network_mode == 'depth':
                 os.mkdir(os.path.join(config.dataset_name, 'primitive_shapes', 'test', 'depth', 'predict' + my_time))
