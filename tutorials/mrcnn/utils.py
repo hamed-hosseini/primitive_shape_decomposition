@@ -362,7 +362,8 @@ class Dataset(object):
             image = skimage.io.imread(self.image_info[image_id]['path'])
         elif self.network_mode == 'gray':
             image = skimage.io.imread(self.image_info[image_id]['path'], as_gray=True)
-            image = skimage.color.gray2rgb(image)
+            image = np.expand_dims(image, axis=2)
+            # image = skimage.color.gray2rgb(image)
         elif self.network_mode == 'depth':
             image = skimage.io.imread(self.image_info[image_id]['path'].replace('color_image', 'depth_image'), as_gray=True)
             image = np.expand_dims(image, axis=2)

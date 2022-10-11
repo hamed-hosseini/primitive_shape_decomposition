@@ -51,7 +51,7 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "gray_datasets_v1"
+    NAME = "gray_one_channel_datasets_v1"
     dataset_name = 'datasets_v1'
     Train = True
     # Train = False
@@ -101,14 +101,14 @@ class CigButtsConfig(Config):
     POST_NMS_ROIS_INFERENCE = 500
     POST_NMS_ROIS_TRAINING = 1000
     USE_MINI_MASK = False
-    # compute_mean_pixel_size = True
-    compute_mean_pixel_size = False
+    compute_mean_pixel_size = True
+    # compute_mean_pixel_size = False
     if Network_mode == 'rgb':
         IMAGE_CHANNEL_COUNT = 3
         MEAN_PIXEL = np.array([254.1749290922619, 254.1700030810805, 253.69742554253475])
     if Network_mode == 'gray':
-        IMAGE_CHANNEL_COUNT = 3
-        MEAN_PIXEL = np.array([254.1749290922619])
+        IMAGE_CHANNEL_COUNT = 1
+        MEAN_PIXEL = np.array([0.500000])
     if Network_mode == 'depth':
         IMAGE_CHANNEL_COUNT = 1
         MEAN_PIXEL = np.array([0.12916169411272974])
@@ -257,10 +257,8 @@ class CocoLikeDataset(utils.Dataset):
                     config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[:-1]
                     config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])[:-1]
                 elif config.Network_mode == 'gray':
-                    config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])[:-1]
-                    config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])[:-1]
-                    config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[:-1]
-                    config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])[:-1]
+                    # config.MEAN_PIXEL = np.array([190.63119681919645])
+                    config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[-1]
                 elif config.Network_mode == 'depth':
                     config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])[-1]
                     config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])[-1]
@@ -419,11 +417,11 @@ if __name__=='__main__':
             # Load weights trained on MS COCO, but skip layers that
             # are different due to the different number of classes
             # See README for instructions to download the COCO weights
-            if config.Network_mode == 'rgb' or config.Network_mode == 'gray' :
+            if config.Network_mode == 'rgb' :
                 model.load_weights(COCO_MODEL_PATH, by_name=True,
                                    exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",
                                             "mrcnn_bbox", "mrcnn_mask"])
-            elif config.Network_mode == 'depth' or config.Network_mode == 'rgb_depth':
+            elif config.Network_mode == 'depth' or config.Network_mode == 'rgb_depth'or config.Network_mode == 'gray' :
                 model.load_weights(COCO_MODEL_PATH, by_name=True,
                                    exclude=["conv1", "mrcnn_class_logits", "mrcnn_bbox_fc",
                                             "mrcnn_bbox", "mrcnn_mask"])
@@ -500,7 +498,7 @@ if __name__=='__main__':
         inference_config = InferenceConfig()
         with open('conf.json', 'r') as f:
             my_dict = json.load(f)
-            if config.Network_mode == 'rgb_depth' or config.Network_mode == 'gray':
+            if config.Network_mode == 'rgb_depth':
                 inference_config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
                 inference_config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
                 inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
@@ -515,7 +513,9 @@ if __name__=='__main__':
                 inference_config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])[:-1]
                 inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[:-1]
                 inference_config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])[:-1]
-
+            elif config.Network_mode == 'gray':
+                # inference_config.MEAN_PIXEL =  np.array([190.63119681919645])
+                inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[-1]
         # Recreate the model in inference mode
         model = modellib.MaskRCNN(mode="inference",
                                   config=inference_config,
