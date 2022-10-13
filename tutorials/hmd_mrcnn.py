@@ -51,7 +51,7 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "gray_one_channel_datasets_v1"
+    NAME = "gray_one_channel_scaleup_datasets_v1"
     dataset_name = 'datasets_v1'
     Train = True
     # Train = False
@@ -311,6 +311,7 @@ class InferenceConfig(CigButtsConfig):
     # IMAGE_MAX_DIM = 640
     DETECTION_MIN_CONFIDENCE = 0.8
     load_model = 'last' # model_name, last
+    # load_model = 'gray_one_channel_datasets_v120221010T1317/mask_rcnn_gray_one_channel_datasets_v1_0099.h5' # model_name, last
 
 if __name__=='__main__':
     print(os.getcwd())
@@ -408,7 +409,8 @@ if __name__=='__main__':
 
 
         # Which weights to start with?
-        init_with = "coco"  # imagenet, coco, or last or nothing
+        # init_with = "coco"  # imagenet, coco, or last or nothing
+        init_with = "last"  # imagenet, coco, or last or nothing
         # init_with = "nothing"  # imagenet, coco, or last or nothing
 
         if init_with == "imagenet":
