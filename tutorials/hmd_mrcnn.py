@@ -61,9 +61,9 @@ class CigButtsConfig(Config):
     debug = False
     train_mode = 'all' # transfer or all
     # train_mode = 'transfer'
-    # Network_mode = 'depth' # rgb, depth, rgb_depth
+    Network_mode = 'depth' # rgb, depth, rgb_depth
     # Network_mode = 'rgb' # rgb, depth, rgb_depth, gray
-    Network_mode = 'gray' # rgb, depth, rgb_depth, gray
+    # Network_mode = 'gray' # rgb, depth, rgb_depth, gray
     # Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
@@ -409,8 +409,8 @@ if __name__=='__main__':
 
 
         # Which weights to start with?
-        # init_with = "coco"  # imagenet, coco, or last or nothing
-        init_with = "last"  # imagenet, coco, or last or nothing
+        init_with = "coco"  # imagenet, coco, or last or nothing
+        # init_with = "last"  # imagenet, coco, or last or nothing
         # init_with = "nothing"  # imagenet, coco, or last or nothing
 
         if init_with == "imagenet":

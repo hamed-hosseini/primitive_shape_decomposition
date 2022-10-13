@@ -370,7 +370,7 @@ class Dataset(object):
         elif self.network_mode == 'rgb_depth':
             rgb_image = skimage.io.imread(self.image_info[image_id]['path'][0])
             depth_image = skimage.io.imread(self.image_info[image_id]['path'][1],
-                                      as_gray=True)
+                                      as_gray=True) * 255.0
             depth_image = np.expand_dims(depth_image, axis=2)
             image = np.concatenate((rgb_image, depth_image), axis=2)
 
