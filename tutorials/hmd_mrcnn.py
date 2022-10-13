@@ -51,7 +51,7 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "gray_one_channel_scaleup_datasets_v1"
+    NAME = "depth_one_channel_scaleup_datasets_v1"
     dataset_name = 'datasets_v1'
     Train = True
     # Train = False
@@ -211,11 +211,16 @@ class CocoLikeDataset(utils.Dataset):
                         std_R_s += [my_image.std(axis=(0, 1))[0]]
                         std_G_s += [my_image.std(axis=(0, 1))[1]]
                         std_B_s += [my_image.std(axis=(0, 1))[2]]
-                    if config.Network_mode == 'depth' or config.Network_mode == 'rgb_depth':
+                    if  config.Network_mode == 'rgb_depth':
                         mean_D_s += [my_image.mean(axis=(0, 1))[3]]
                         min_D_s += [my_image.min(axis=(0, 1))[3]]
                         max_D_s += [my_image.max(axis=(0, 1))[3]]
                         std_D_s += [my_image.std(axis=(0, 1))[3]]
+                    if config.Network_mode=='depth':
+                        mean_D_s += [my_image.mean(axis=(0, 1))[0]]
+                        min_D_s += [my_image.min(axis=(0, 1))[0]]
+                        max_D_s += [my_image.max(axis=(0, 1))[0]]
+                        std_D_s += [my_image.std(axis=(0, 1))[0]]
                     if config.Network_mode == 'gray':
                         mean_grays += [my_image.mean(axis=(0, 1))[0]]
         if mean_pixel_evaluate:
@@ -244,31 +249,31 @@ class CocoLikeDataset(utils.Dataset):
             with open('conf.json', 'w') as f:
                 my_dict = {}
                 my_dict['MEAN_PIXEL'] = config.MEAN_PIXEL.tolist()
-                my_dict['MIN_PIXEL'] = config.MIN_PIXEL.tolist()
-                my_dict['MAX_PIXEL'] = config.MAX_PIXEL.tolist()
-                my_dict['STD_PIXEL'] = config.STD_PIXEL.tolist()
+                # my_dict['MIN_PIXEL'] = config.MIN_PIXEL.tolist()
+                # my_dict['MAX_PIXEL'] = config.MAX_PIXEL.tolist()
+                # my_dict['STD_PIXEL'] = config.STD_PIXEL.tolist()
                 json.dump(my_dict, f)
         else:
             with open('conf.json', 'r') as f:
                 my_dict = json.load(f)
                 if config.Network_mode == 'rgb':
-                    config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])[:-1]
-                    config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])[:-1]
-                    config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[:-1]
-                    config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])[:-1]
+                    # config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
+                    # config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
+                    config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
+                    # config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])
                 elif config.Network_mode == 'gray':
                     # config.MEAN_PIXEL = np.array([190.63119681919645])
-                    config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[-1]
-                elif config.Network_mode == 'depth':
-                    config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])[-1]
-                    config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])[-1]
-                    config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[-1]
-                    config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])[-1]
-                elif config.Network_mode == 'rgb_depth':
-                    config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
-                    config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
                     config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
-                    config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])
+                elif config.Network_mode == 'depth':
+                    # config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
+                    # config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
+                    config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
+                    # config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])
+                elif config.Network_mode == 'rgb_depth':
+                    # config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
+                    # config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
+                    config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
+                    # config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])
 
 
     def load_mask(self, image_id):
@@ -501,23 +506,23 @@ if __name__=='__main__':
         with open('conf.json', 'r') as f:
             my_dict = json.load(f)
             if config.Network_mode == 'rgb_depth':
-                inference_config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
-                inference_config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
+                # inference_config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
+                # inference_config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
                 inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
-                inference_config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])
+                # inference_config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])
             elif config.Network_mode == 'depth':
-                inference_config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])[-1]
-                inference_config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])[-1]
-                inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[-1]
-                inference_config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])[-1]
+                # inference_config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
+                # inference_config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
+                inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
+                # inference_config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])
             elif config.Network_mode == 'rgb':
-                inference_config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])[:-1]
-                inference_config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])[:-1]
-                inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[:-1]
-                inference_config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])[:-1]
+                # inference_config.MIN_PIXEL = np.array(my_dict['MIN_PIXEL'])
+                # inference_config.MAX_PIXEL = np.array(my_dict['MAX_PIXEL'])
+                inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
+                # inference_config.STD_PIXEL = np.array(my_dict['STD_PIXEL'])
             elif config.Network_mode == 'gray':
                 # inference_config.MEAN_PIXEL =  np.array([190.63119681919645])
-                inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])[-1]
+                inference_config.MEAN_PIXEL = np.array(my_dict['MEAN_PIXEL'])
         # Recreate the model in inference mode
         model = modellib.MaskRCNN(mode="inference",
                                   config=inference_config,
