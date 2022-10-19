@@ -19,6 +19,9 @@ import matplotlib.pyplot as plt
 from matplotlib import patches,  lines
 from matplotlib.patches import Polygon
 import IPython.display
+import skimage.color
+import skimage.io
+import skimage.transform
 
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../")
@@ -70,9 +73,12 @@ def random_colors(N, bright=True):
     return colors
 
 
-def apply_mask(image, mask, color, alpha=0.5):
+def apply_mask(image, mask, color, alpha=0.5, config=None):
     """Apply the given mask to the image.
     """
+    if config.Network_mode == 'gray':
+        image = skimage.color.gray2rgb(image[:,:,0])
+
     for c in range(3):
         image[:, :, c] = np.where(mask == 1,
                                   image[:, :, c] *
@@ -155,7 +161,7 @@ def display_instances(image, boxes, masks, class_ids, class_names,
         # Mask
         mask = masks[:, :, i]
         if show_mask:
-            masked_image = apply_mask(masked_image, mask, color)
+            masked_image = apply_mask(masked_image, mask, color, config=config)
 
         # Mask Polygon
         # Pad to ensure proper polygons for masks that touch image edges.

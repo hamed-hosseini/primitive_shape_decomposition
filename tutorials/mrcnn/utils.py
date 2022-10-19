@@ -365,12 +365,12 @@ class Dataset(object):
             image = np.expand_dims(image, axis=2)
             # image = skimage.color.gray2rgb(image)
         elif self.network_mode == 'depth':
-            image = skimage.io.imread(self.image_info[image_id]['path'].replace('color_image', 'depth_image'), as_gray=True) * 255.0
+            image = skimage.io.imread(self.image_info[image_id]['path'].replace('color_image', 'depth_image'), as_gray=True) * 1000.0
             image = np.expand_dims(image, axis=2)
         elif self.network_mode == 'rgb_depth':
             rgb_image = skimage.io.imread(self.image_info[image_id]['path'][0])
             depth_image = skimage.io.imread(self.image_info[image_id]['path'][1],
-                                      as_gray=True)
+                                      as_gray=True) * 1000.0
             depth_image = np.expand_dims(depth_image, axis=2)
             image = np.concatenate((rgb_image, depth_image), axis=2)
 
