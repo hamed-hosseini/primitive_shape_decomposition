@@ -51,10 +51,10 @@ class CigButtsConfig(Config):
     to the cigarette butts dataset.
     """
     # Give the configuration a recognizable name
-    NAME = "rgbd_scaleupd1000_datasets_v1"
+    NAME = "depth_one_channel_scaleup_lr001_datasets_v1"
     dataset_name = 'datasets_v1'
-    Train = True
-    # Train = False
+    # Train = True
+    Train = False
     Test = True
     # Test = False
     # debug = True
@@ -64,7 +64,7 @@ class CigButtsConfig(Config):
     Network_mode = 'depth' # rgb, depth, rgb_depth
     # Network_mode = 'rgb' # rgb, depth, rgb_depth, gray
     # Network_mode = 'gray' # rgb, depth, rgb_depth, gray
-    Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
+    # Network_mode = 'rgb_depth' # rgb, depth, rgb_depth
     # Train on 1 GPU and 1 image per GPU. Batch size is 1 (GPUs * images/GPU).
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
@@ -414,8 +414,8 @@ if __name__=='__main__':
 
 
         # Which weights to start with?
-        init_with = "coco"  # imagenet, coco, or last or nothing
-        # init_with = "last"  # imagenet, coco, or last or nothing
+        # init_with = "coco"  # imagenet, coco, or last or nothing
+        init_with = "last"  # imagenet, coco, or last or nothing
         # init_with = "nothing"  # imagenet, coco, or last or nothing
 
         if init_with == "imagenet":

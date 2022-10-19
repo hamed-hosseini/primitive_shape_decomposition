@@ -76,7 +76,7 @@ def random_colors(N, bright=True):
 def apply_mask(image, mask, color, alpha=0.5, config=None):
     """Apply the given mask to the image.
     """
-    if config.Network_mode == 'gray':
+    if config.Network_mode == 'gray' or config.Network_mode == 'depth':
         image = skimage.color.gray2rgb(image[:,:,0])
 
     for c in range(3):
